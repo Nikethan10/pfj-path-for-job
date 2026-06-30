@@ -1,0 +1,21 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets must be provided at runtime (env vars / mounted secret file), never baked in.
+.env
+.env.*
+!.env.example
+config/firebase-service-account.json
+*-service-account.json
+
+# Local data / dev-only
+*.db
+*.sqlite3
+tests/
+.git/

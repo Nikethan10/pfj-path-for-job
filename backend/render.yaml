@@ -1,0 +1,28 @@
+# Render blueprint for the PFJ backend (Dockerized FastAPI).
+# Deploy: New > Blueprint, point at this repo. Set secret env vars in the dashboard,
+# and add the Firebase service account as a Secret File mounted at the path below.
+services:
+  - type: web
+    name: pfj-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: ENV
+        value: production
+      # Comma-separated list of your deployed frontend origin(s), e.g. https://your-app.vercel.app
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: FIREBASE_DATABASE_URL
+        sync: false
+      # Add the service account JSON as a Render "Secret File" mounted at this path.
+      - key: FIREBASE_CREDENTIALS_PATH
+        value: /etc/secrets/firebase-service-account.json

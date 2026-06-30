@@ -1,0 +1,29 @@
+{
+  "badges": [
+    { "id": "first-skill", "name": "First Steps", "description": "Add your first skill to your profile.", "tier": "bronze", "category": "Skills", "icon": "skill", "metric": "skills_count", "target": 1 },
+    { "id": "skill-explorer", "name": "Skill Explorer", "description": "Track 5 skills on your profile.", "tier": "silver", "category": "Skills", "icon": "skill", "metric": "skills_count", "target": 5 },
+    { "id": "skill-master", "name": "Skill Master", "description": "Track 10 skills on your profile.", "tier": "gold", "category": "Skills", "icon": "skill", "metric": "skills_count", "target": 10 },
+    { "id": "advanced-skill", "name": "Expert in the Making", "description": "Reach Advanced level in a skill.", "tier": "gold", "category": "Skills", "icon": "star", "metric": "skills_advanced", "target": 1 },
+
+    { "id": "first-project", "name": "Builder", "description": "Add your first portfolio project.", "tier": "bronze", "category": "Projects", "icon": "rocket", "metric": "projects_count", "target": 1 },
+    { "id": "portfolio-pro", "name": "Portfolio Pro", "description": "Add 3 projects to your portfolio.", "tier": "silver", "category": "Projects", "icon": "rocket", "metric": "projects_count", "target": 3 },
+
+    { "id": "resume-rookie", "name": "Resume Rookie", "description": "Run your first resume analysis.", "tier": "bronze", "category": "Resume", "icon": "doc", "metric": "resume_analyses", "target": 1 },
+    { "id": "ats-optimizer", "name": "ATS Optimizer", "description": "Analyze your resume 3 times.", "tier": "silver", "category": "Resume", "icon": "doc", "metric": "resume_analyses", "target": 3 },
+
+    { "id": "interview-initiate", "name": "Interview Initiate", "description": "Answer your first mock interview question.", "tier": "bronze", "category": "Interview", "icon": "mic", "metric": "interviews_taken", "target": 1 },
+    { "id": "interview-veteran", "name": "Interview Veteran", "description": "Answer 10 mock interview questions.", "tier": "silver", "category": "Interview", "icon": "mic", "metric": "interviews_taken", "target": 10 },
+
+    { "id": "first-challenge", "name": "Code Cracker", "description": "Complete your first coding challenge.", "tier": "bronze", "category": "Challenges", "icon": "code", "metric": "challenges_completed", "target": 1 },
+    { "id": "challenge-champion", "name": "Challenge Champion", "description": "Complete 10 coding challenges.", "tier": "gold", "category": "Challenges", "icon": "code", "metric": "challenges_completed", "target": 10 },
+
+    { "id": "roadmap-starter", "name": "On the Path", "description": "Complete your first roadmap milestone.", "tier": "bronze", "category": "Roadmap", "icon": "map", "metric": "roadmap_completed", "target": 1 },
+    { "id": "roadmap-finisher", "name": "Trailblazer", "description": "Complete 5 roadmap milestones.", "tier": "silver", "category": "Roadmap", "icon": "map", "metric": "roadmap_completed", "target": 5 },
+
+    { "id": "consistency-3", "name": "Getting Consistent", "description": "Be active on 3 different days.", "tier": "bronze", "category": "Consistency", "icon": "flame", "metric": "active_days", "target": 3 },
+    { "id": "consistency-7", "name": "Streak Seeker", "description": "Be active on 7 different days.", "tier": "silver", "category": "Consistency", "icon": "flame", "metric": "active_days", "target": 7 },
+
+    { "id": "readiness-50", "name": "Halfway There", "description": "Reach a 50% placement-readiness score.", "tier": "silver", "category": "Readiness", "icon": "trophy", "metric": "readiness_score", "target": 50 },
+    { "id": "readiness-80", "name": "Placement Ready", "description": "Reach an 80% placement-readiness score.", "tier": "gold", "category": "Readiness", "icon": "trophy", "metric": "readiness_score", "target": 80 }
+  ]
+}
