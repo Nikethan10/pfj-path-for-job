@@ -125,7 +125,7 @@ const links = [
   },
 ];
 
-export default function Sidebar({ isExpanded, setIsExpanded }) {
+export default function Sidebar({ isExpanded, setIsExpanded, mobileOpen = false, onLinkClick }) {
   const { user, logoutUser } = useAuth();
   const { config, isFeatureEnabled } = useConfig();
   const navigate = useNavigate();
@@ -155,7 +155,7 @@ export default function Sidebar({ isExpanded, setIsExpanded }) {
       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
-      className="fixed left-0 top-0 h-screen glass-sidebar z-45 flex flex-col overflow-hidden"
+      className={`fixed left-0 top-0 h-screen glass-sidebar z-50 flex flex-col overflow-hidden transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
       style={{ boxShadow: '4px 0 25px rgba(0,0,0,0.02), 1px 0 0 rgba(0,0,0,0.04)' }}
     >
       {/* Logo Area */}
@@ -192,6 +192,7 @@ export default function Sidebar({ isExpanded, setIsExpanded }) {
           >
             <NavLink
               to={link.to}
+              onClick={onLinkClick}
               className={({ isActive }) =>
                 `group flex items-center px-3.5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 relative ${
                   isActive

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { getProfile, createProfile } from '../services/profileService';
 import { getStudentSkills, getAvailableSkills, addSkill, getAvailableRoles } from '../services/skillService';
-import { getSummary } from '../services/analyticsService';
+import { getSummary, getActivityHeatmap } from '../services/analyticsService';
 import { getProjects } from '../services/projectService';
 import Loader from '../components/Loader';
 
@@ -44,18 +44,28 @@ const BRANCH_RECOMMENDED_ROLES = {
   'Software Engineering': ['Software Engineer', 'Full Stack Developer']
 };
 
-// Helper to generate fake activity heatmap data
-const generateHeatmapData = () => {
-  const data = [];
-  for (let i = 0; i < 7; i++) { // 7 weeks
-    const week = [];
-    for (let j = 0; j < 7; j++) { // 7 days
-      // Random intensity 0-4
-      week.push(Math.floor(Math.random() * 5));
-    }
-    data.push(week);
+// Build a REAL 7-week x 7-day activity grid (+ streak/total) from the activity map
+// returned by GET /api/analytics/activity ({ 'YYYY-MM-DD': count }).
+const buildHeatmap = (activityMap = {}) => {
+  const days = [];
+  const today = new Date();
+  for (let i = 48; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const count = activityMap[key] || 0;
+    days.push({ count, intensity: count <= 0 ? 0 : Math.min(4, count) });
   }
-  return data;
+  const grid = [];
+  for (let w = 0; w < 7; w++) grid.push(days.slice(w * 7, w * 7 + 7).map((x) => x.intensity));
+
+  const total = days.reduce((s, x) => s + x.count, 0);
+  let streak = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    if (days[i].count > 0) streak += 1;
+    else break;
+  }
+  return { grid, total, streak };
 };
 
 const getRoleDemandData = (role) => {
@@ -245,6 +255,7 @@ export default function Dashboard() {
   const [availableSkills, setAvailableSkills] = useState([]);
   const [selectedSkill, setSelectedSkill] = useState('');
   const [heatmapData, setHeatmapData] = useState([]);
+  const [heatmapStats, setHeatmapStats] = useState({ total: 0, streak: 0 });
   const [hoveredCell, setHoveredCell] = useState(null);
   const [totalProjects, setTotalProjects] = useState(0);
 
@@ -443,7 +454,9 @@ export default function Dashboard() {
 
   useEffect(() => { 
     loadData(); 
-    setHeatmapData(generateHeatmapData());
+    getActivityHeatmap()
+      .then((res) => { const h = buildHeatmap(res.data || {}); setHeatmapData(h.grid); setHeatmapStats({ total: h.total, streak: h.streak }); })
+      .catch(() => { const h = buildHeatmap({}); setHeatmapData(h.grid); setHeatmapStats({ total: h.total, streak: h.streak }); });
 
     const handleRefresh = () => {
       loadData();
@@ -753,12 +766,12 @@ export default function Dashboard() {
           
           <div className="mt-4 flex justify-between items-end border-t border-dark-700 pt-4">
             <div>
-              <p className="text-xl font-black text-slate-900 leading-none">12</p>
+              <p className="text-xl font-black text-slate-900 leading-none">{heatmapStats.streak}</p>
               <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mt-1">Day Streak</p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-black text-slate-900 leading-none">48</p>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mt-1">Completed Activities</p>
+              <p className="text-xl font-black text-slate-900 leading-none">{heatmapStats.total}</p>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mt-1">Activities (7 wks)</p>
             </div>
           </div>
         </div>
@@ -822,8 +835,8 @@ export default function Dashboard() {
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-black text-slate-900 leading-tight">5+</p>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Active Job Matches</p>
+            <p className="text-2xl font-black text-slate-900 leading-tight">{summary?.readiness?.total_score ?? 0}%</p>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">Readiness Score</p>
           </div>
         </div>
       </div>
@@ -835,11 +848,11 @@ export default function Dashboard() {
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 flex items-center gap-2">
               <span>🎯</span> Placement Market Intelligence & Future Skills
             </h2>
-            <p className="text-xs text-slate-400 font-medium">Real-time job postings, regional trends, salary predictions, and future skills forecast.</p>
+            <p className="text-xs text-slate-400 font-medium">Illustrative industry skill trends and typical salary ranges — sample guidance, not live data.</p>
           </div>
           <div className="flex gap-2">
-            <span className="text-[10px] bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg font-mono font-bold uppercase tracking-wider animate-pulse">
-              ● Live Scrapers Active
+            <span className="text-[10px] bg-stone-100 text-stone-500 border border-stone-200 px-2.5 py-1.5 rounded-lg font-mono font-bold uppercase tracking-wider">
+              Sample data
             </span>
           </div>
         </div>
@@ -850,14 +863,14 @@ export default function Dashboard() {
             <div>
               <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                 <h3 className="text-sm font-extrabold uppercase tracking-wider text-[#be123c] flex items-center gap-1.5">
-                   Future Skills Demand Forecast (2027-2030)
+                   Industry Skill Trends (illustrative)
                 </h3>
                 <span className="text-[9px] font-mono bg-stone-100 border border-stone-200 text-stone-500 px-2 py-0.5 rounded font-bold">
-                  Prophet + XGBoost Ensemble
+                  Sample
                 </span>
               </div>
               <p className="text-xs text-slate-500 mb-4 font-sans leading-relaxed">
-                PFJ predicts regional placement skill trajectories using historical data points, hiring velocity, and developer activity metrics.
+                General industry skill trends to help you prioritize what to learn. These are illustrative examples, not a live prediction.
               </p>
 
               <div className="space-y-3">
@@ -876,7 +889,7 @@ export default function Dashboard() {
             </div>
 
             <div className="border-t border-dark-700 pt-4 mt-6 flex justify-between items-center">
-              <span className="text-[9px] text-slate-400 font-mono">FORECAST GENERATED TODAY</span>
+              <span className="text-[9px] text-slate-400 font-mono">ILLUSTRATIVE SAMPLE</span>
             </div>
           </div>
 
@@ -888,11 +901,11 @@ export default function Dashboard() {
                    Indian Tech Cities - Hiring Intensity & Salaries
                 </h3>
                 <span className="text-[9px] font-mono bg-stone-100 border border-stone-200 text-stone-500 px-2 py-0.5 rounded font-bold">
-                  Module 8 + Module 22
+                  Sample
                 </span>
               </div>
               <p className="text-xs text-slate-500 mb-4 font-sans leading-relaxed">
-                Real-time regional placement index comparing average annual package offerings and hiring index intensity.
+                Typical salary ranges and hiring activity by city — illustrative sample data for guidance.
               </p>
 
               {/* City grid table */}
@@ -936,9 +949,9 @@ export default function Dashboard() {
             <div className="border-t border-dark-700 pt-4 mt-6 flex justify-between items-center text-[10px] text-slate-500 font-sans leading-normal">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#166534]" />
-                Power BI + Recharts Integration Live
+                Illustrative sample data
               </span>
-              <span className="font-semibold text-slate-700">6 Indian Tech Hubs Audited</span>
+              <span className="font-semibold text-slate-700">6 cities shown</span>
             </div>
           </div>
         </div>
