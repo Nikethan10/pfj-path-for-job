@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # Comma-separated list of allowed CORS origins (the frontend URL[s]).
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
 
+    # Comma-separated emails that are always treated as Super Admins (bootstrap).
+    # Any other admins are managed in the Firestore `admins` collection.
+    SUPER_ADMIN_EMAILS: str = ""
+
     # Ignore any legacy keys still present in a local .env (e.g. DATABASE_URL).
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -31,6 +35,10 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.ENV.strip().lower() == "production"
+
+    @property
+    def super_admin_emails(self) -> list[str]:
+        return [e.strip().lower() for e in self.SUPER_ADMIN_EMAILS.split(",") if e.strip()]
 
 
 @lru_cache()

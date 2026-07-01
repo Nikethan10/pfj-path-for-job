@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useConfig } from '../context/ConfigContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const links = [
@@ -126,7 +127,21 @@ const links = [
 
 export default function Sidebar({ isExpanded, setIsExpanded }) {
   const { user, logoutUser } = useAuth();
+  const { config, isFeatureEnabled } = useConfig();
   const navigate = useNavigate();
+
+  // Apply admin-controlled feature flags + navigation (labels / order / visibility).
+  const navCfg = {};
+  (config?.nav || []).forEach((n) => { navCfg[n.path] = n; });
+  const displayedLinks = links
+    .filter((l) => {
+      const key = l.to.replace('/', '');
+      const alwaysOn = key === 'dashboard' || key === 'settings';
+      const featureOn = alwaysOn || isFeatureEnabled(key);
+      return featureOn && navCfg[l.to]?.enabled !== false;
+    })
+    .map((l) => ({ ...l, label: navCfg[l.to]?.label || l.label, order: navCfg[l.to]?.order ?? 999 }))
+    .sort((a, b) => a.order - b.order);
 
   const handleLogout = () => {
     logoutUser();
@@ -168,7 +183,7 @@ export default function Sidebar({ isExpanded, setIsExpanded }) {
 
       {/* Nav Links List */}
       <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto overflow-x-hidden custom-scrollbar">
-        {links.map((link, idx) => (
+        {displayedLinks.map((link, idx) => (
           <motion.div
             key={link.to}
             initial={{ opacity: 0, x: -10 }}

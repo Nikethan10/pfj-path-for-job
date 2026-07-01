@@ -39,6 +39,20 @@ Never commit `.env`, `*.local`, `*-service-account.json`, or `*.db`.
 | **Achievements** | Tiered badges earned from real activity. |
 | **AI Assistant** | In-app copilot for navigation and career guidance. |
 
+## Hidden admin portal (no-code CMS)
+
+A hidden, role-guarded admin portal lets the owner change the site **without touching code** — the public
+app reads its content, theme, feature flags, and navigation from the database (`GET /api/config`) at runtime.
+
+- **URL:** `/admin` (not linked anywhere in the public UI). Security is enforced **server-side** on every
+  admin request — the hidden URL is convenience, not the boundary.
+- **Roles:** **Super Admin** (full control incl. managing admins) and **Admin** (everything else).
+  Bootstrap by putting the owner's login email in `SUPER_ADMIN_EMAILS` (backend env); further admins are
+  added in-app. Sign in normally, then visit `/admin`.
+- **Controls:** homepage/site content + SEO, theme colors, **feature flags** (hide any page from students
+  instantly), navigation labels/order/visibility, user management (ban/unban/delete — real, via Firebase),
+  admin management, and an audit log of every change.
+
 ## Architecture
 
 ```

@@ -32,6 +32,8 @@ from routes.challenges import router as challenges_router
 from routes.jobs import router as jobs_router
 from routes.assistant import router as assistant_router
 from routes.badges import router as badges_router
+from routes.config import router as config_router
+from routes.admin import router as admin_router
 
 settings = get_settings()
 
@@ -101,6 +103,8 @@ app.include_router(challenges_router)
 app.include_router(jobs_router)
 app.include_router(assistant_router)
 app.include_router(badges_router)
+app.include_router(config_router)
+app.include_router(admin_router)
 
 
 @app.get("/")
