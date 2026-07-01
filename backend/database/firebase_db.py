@@ -2,6 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore, db, auth
 from config.settings import get_settings
 import os
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,17 +14,22 @@ def initialize_firebase():
     # Check if already initialized
     if not firebase_admin._apps:
         try:
-            # Resolve the absolute path of the credentials file
-            # Assuming settings.FIREBASE_CREDENTIALS_PATH is relative to the backend directory
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            cred_path = os.path.join(base_dir, settings.FIREBASE_CREDENTIALS_PATH)
-            
-            if not os.path.exists(cred_path):
-                logger.error(f"Firebase credentials not found at: {cred_path}")
-                return
-                
-            cred = credentials.Certificate(cred_path)
-            
+            cred = None
+            # Preferred on managed hosts (no secret files): full service-account JSON in an env var.
+            if settings.FIREBASE_SERVICE_ACCOUNT.strip():
+                cred = credentials.Certificate(json.loads(settings.FIREBASE_SERVICE_ACCOUNT))
+            else:
+                # Local/dev: read the service-account file (path relative to the backend directory).
+                base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                cred_path = os.path.join(base_dir, settings.FIREBASE_CREDENTIALS_PATH)
+                if not os.path.exists(cred_path):
+                    logger.error(
+                        "Firebase credentials missing: set FIREBASE_SERVICE_ACCOUNT (JSON) "
+                        f"or provide the file at {cred_path}"
+                    )
+                    return
+                cred = credentials.Certificate(cred_path)
+
             # Initialize with both Firestore capabilities and Realtime DB URL
             firebase_admin.initialize_app(cred, {
                 'databaseURL': settings.FIREBASE_DATABASE_URL

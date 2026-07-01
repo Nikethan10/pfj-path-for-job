@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     # ── Firebase (required for auth + Firestore) ──
     FIREBASE_CREDENTIALS_PATH: str = "config/firebase-service-account.json"
+    # On managed hosts (no secret files), paste the whole service-account JSON here instead.
+    FIREBASE_SERVICE_ACCOUNT: str = ""
     FIREBASE_DATABASE_URL: str = ""
     FIREBASE_DATABASE_SECRET: str = ""
 

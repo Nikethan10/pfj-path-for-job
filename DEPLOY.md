@@ -32,19 +32,34 @@ gh repo create Nikethan10/pfj-path-for-job --private --source=. --remote=origin 
 
 ---
 
-## 2. Backend → Render (Dockerized FastAPI)
+## 2. Backend → Koyeb (free, **no credit card**) — builds the Dockerfile from GitHub
 
-1. Render dashboard → **New → Blueprint** → connect the GitHub repo (it reads `backend/render.yaml`).
-2. Set environment variables (dashboard → the service → Environment):
+> Render's Blueprint now requires a card. Koyeb (below) and Hugging Face Spaces are free and need **no
+> card**. The backend reads its Firebase key from an env var (`FIREBASE_SERVICE_ACCOUNT`), so no secret
+> file is required on the host.
+
+1. Sign in to **koyeb.com** with GitHub (as Nikethan10).
+2. **Create Web Service → GitHub →** pick `pfj-path-for-job`.
+3. Builder = **Dockerfile**; **Work directory = `backend`** (Dockerfile path `backend/Dockerfile`).
+4. Instance = **Free (nano)**; **Port = 8000**.
+5. Environment variables:
    - `ENV = production`
    - `ALLOWED_ORIGINS = https://<your-vercel-domain>.vercel.app`
-   - `GROQ_API_KEY`, `GEMINI_API_KEY` (and `GITHUB_TOKEN` if used) — your existing keys.
+   - `GROQ_API_KEY`, `GEMINI_API_KEY` (your existing keys)
    - `FIREBASE_DATABASE_URL = https://pathforjob0-default-rtdb.firebaseio.com`
    - `SUPER_ADMIN_EMAILS = nikethantirumala@gmail.com`
-   - `FIREBASE_CREDENTIALS_PATH = /etc/secrets/firebase-service-account.json`
-3. Add a **Secret File**: name `firebase-service-account.json`, mount path `/etc/secrets/`, paste the
-   service-account JSON contents.
-4. Deploy. Health check: `https://<render-service>.onrender.com/api/health`.
+   - `FIREBASE_SERVICE_ACCOUNT = <paste the ENTIRE service-account JSON, one line>`  *(mark as secret)*
+6. Deploy. Health check: `https://<app>.koyeb.app/api/health`.
+
+### Alternative — Hugging Face Spaces (Docker, free, no card)
+1. huggingface.co → **New Space → SDK: Docker**.
+2. Push the `backend/` contents to the Space (it has its own git repo) and set the Space README metadata
+   `app_port: 8000`.
+3. Under **Settings → Variables and secrets**, add the same variables as above (put `FIREBASE_SERVICE_ACCOUNT`,
+   `GROQ_API_KEY`, `GEMINI_API_KEY` as **secrets**).
+4. It builds the Dockerfile and serves at `https://<user>-<space>.hf.space`.
+
+*(A `backend/render.yaml` is still included if you ever add a card to Render — but it's not needed for Koyeb/HF.)*
 
 ---
 
