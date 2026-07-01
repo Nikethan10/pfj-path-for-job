@@ -6,11 +6,12 @@ import Loader from '../components/Loader';
 import Logo from '../components/Logo';
 import * as admin from '../services/adminService';
 
-type SectionKey = 'overview' | 'content' | 'theme' | 'features' | 'nav' | 'users' | 'admins' | 'audit';
+type SectionKey = 'overview' | 'content' | 'branding' | 'theme' | 'features' | 'nav' | 'users' | 'admins' | 'audit';
 
 const SECTIONS: { key: SectionKey; label: string; superOnly?: boolean }[] = [
   { key: 'overview', label: 'Overview' },
   { key: 'content', label: 'Content' },
+  { key: 'branding', label: 'Branding' },
   { key: 'theme', label: 'Theme' },
   { key: 'features', label: 'Features' },
   { key: 'nav', label: 'Navigation' },
@@ -71,6 +72,94 @@ function useSaver() {
 const field = 'input-field';
 const label = 'block text-sm font-semibold text-slate-700 mb-1';
 
+/** Resize + compress an image in the browser to a small data URL (free-tier friendly — no cloud storage). */
+async function fileToResizedDataUrl(file: File, maxDim: number, quality = 0.82): Promise<string> {
+  const dataUrl: string = await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result as string);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+  if (file.type === 'image/svg+xml') return dataUrl; // vector — already tiny
+  const img = document.createElement('img');
+  await new Promise((resolve, reject) => {
+    img.onload = resolve;
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+  let { width, height } = img;
+  if (width > maxDim || height > maxDim) {
+    if (width >= height) {
+      height = Math.round((height * maxDim) / width);
+      width = maxDim;
+    } else {
+      width = Math.round((width * maxDim) / height);
+      height = maxDim;
+    }
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  canvas.getContext('2d')?.drawImage(img, 0, 0, width, height);
+  const isPng = file.type === 'image/png';
+  return canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', quality);
+}
+
+function Branding({ cfg, refresh }: { cfg: any; refresh: () => void }) {
+  const [branding, setBranding] = useState<any>(cfg.branding || {});
+  const [busy, setBusy] = useState('');
+  const saver = useSaver();
+
+  const pick = async (key: string, maxDim: number, file?: File) => {
+    if (!file) return;
+    setBusy(key);
+    try {
+      const url = await fileToResizedDataUrl(file, maxDim);
+      if (url.length > 900000) {
+        alert('That image is still too large after compression. Please use a smaller one.');
+        return;
+      }
+      setBranding((b: any) => ({ ...b, [key]: url }));
+    } catch {
+      alert('Could not process that image.');
+    } finally {
+      setBusy('');
+    }
+  };
+
+  return (
+    <div className="glass-card max-w-lg space-y-6">
+      <div>
+        <h3 className="font-bold text-slate-800 mb-1">Logo</h3>
+        <p className="text-sm text-slate-500 mb-3">Shown top-left across the app. PNG or SVG recommended.</p>
+        {branding.logoUrl
+          ? <img src={branding.logoUrl} alt="logo" className="h-12 mb-2 rounded bg-white border border-dark-700 p-1" />
+          : <p className="text-xs text-slate-400 mb-2">Using the built-in PFJ mark.</p>}
+        <div className="flex items-center gap-3">
+          <input type="file" accept="image/*" onChange={(e) => pick('logoUrl', 256, e.target.files?.[0])} />
+          {branding.logoUrl && <button className="text-rose-600 text-sm" onClick={() => setBranding((b: any) => ({ ...b, logoUrl: '' }))}>Remove</button>}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-bold text-slate-800 mb-1">Homepage hero image</h3>
+        <p className="text-sm text-slate-500 mb-3">Optional large image for the landing page.</p>
+        {branding.heroImageUrl
+          ? <img src={branding.heroImageUrl} alt="hero" className="h-28 mb-2 rounded border border-dark-700 object-cover" />
+          : <p className="text-xs text-slate-400 mb-2">No hero image set.</p>}
+        <div className="flex items-center gap-3">
+          <input type="file" accept="image/*" onChange={(e) => pick('heroImageUrl', 1280, e.target.files?.[0])} />
+          {branding.heroImageUrl && <button className="text-rose-600 text-sm" onClick={() => setBranding((b: any) => ({ ...b, heroImageUrl: '' }))}>Remove</button>}
+        </div>
+      </div>
+
+      {busy && <p className="text-sm text-slate-500">Processing image…</p>}
+      <SaveBar {...saver} onSave={() => saver.run(async () => { await admin.adminUpdateConfig('branding', branding); refresh(); })} />
+      <p className="text-xs text-slate-400">Images are compressed in your browser and saved into the site config — no paid storage needed.</p>
+    </div>
+  );
+}
+
 /* ─── Overview ─── */
 function Overview() {
   const [stats, setStats] = useState<any>(null);
@@ -100,9 +189,11 @@ function Content({ cfg, refresh }: { cfg: any; refresh: () => void }) {
   const [hero, setHero] = useState(cfg.content?.hero || {});
   const [footer, setFooter] = useState(cfg.content?.footer || {});
   const [seo, setSeo] = useState(cfg.seo || {});
+  const [ann, setAnn] = useState<any>(cfg.announcement || {});
   const s1 = useSaver();
   const s2 = useSaver();
   const s3 = useSaver();
+  const s4 = useSaver();
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -145,6 +236,21 @@ function Content({ cfg, refresh }: { cfg: any; refresh: () => void }) {
         <label className={`${label} mt-3`}>Meta description</label>
         <textarea className={field} rows={2} value={seo.description || ''} onChange={(e) => setSeo({ ...seo, description: e.target.value })} />
         <SaveBar {...s3} onSave={() => s3.run(async () => { await admin.adminUpdateConfig('seo', seo); refresh(); })} />
+      </div>
+
+      <div className="glass-card">
+        <h3 className="font-bold text-slate-800 mb-3">Announcement banner</h3>
+        <label className="flex items-center gap-2 mb-3 text-slate-700 font-medium">
+          <input type="checkbox" checked={!!ann.enabled} onChange={(e) => setAnn({ ...ann, enabled: e.target.checked })} />
+          Show a site-wide banner
+        </label>
+        <input className={field} placeholder="Banner message" value={ann.text || ''} onChange={(e) => setAnn({ ...ann, text: e.target.value })} />
+        <select className={`${field} mt-3`} value={ann.type || 'info'} onChange={(e) => setAnn({ ...ann, type: e.target.value })}>
+          <option value="info">Info (brand)</option>
+          <option value="success">Success (green)</option>
+          <option value="warning">Warning (amber)</option>
+        </select>
+        <SaveBar {...s4} onSave={() => s4.run(async () => { await admin.adminUpdateConfig('announcement', ann); refresh(); })} />
       </div>
     </div>
   );
@@ -408,6 +514,7 @@ export default function AdminApp() {
           <>
             {section === 'overview' && <Overview />}
             {section === 'content' && cfg && <Content cfg={cfg} refresh={reloadCfg} />}
+            {section === 'branding' && cfg && <Branding cfg={cfg} refresh={reloadCfg} />}
             {section === 'theme' && cfg && <Theme cfg={cfg} refresh={reloadCfg} />}
             {section === 'features' && cfg && <Features cfg={cfg} refresh={reloadCfg} />}
             {section === 'nav' && cfg && <Navigation cfg={cfg} refresh={reloadCfg} />}

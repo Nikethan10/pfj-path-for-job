@@ -1,8 +1,15 @@
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
+import { useConfig } from '../context/ConfigContext';
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { config } = useConfig();
+  const tagline = config?.content?.footer?.tagline || config?.site?.tagline
+    || 'AI-driven career intelligence that helps students become placement-ready.';
+  const copyright = config?.site?.copyright
+    ? `${config.site.copyright} · All rights reserved.`
+    : `© ${year} PFJ — Path For Job. All rights reserved.`;
   return (
     <footer className="border-t border-dark-700 bg-dark-800">
       <div className="max-w-5xl mx-auto px-6 py-10 grid gap-8 grid-cols-2 md:grid-cols-4 text-sm">
@@ -10,9 +17,7 @@ export default function Footer() {
           <Link to="/" className="flex items-center gap-2">
             <Logo size={28} withWordmark />
           </Link>
-          <p className="text-slate-500 max-w-xs">
-            AI-driven career intelligence that helps students become placement-ready.
-          </p>
+          <p className="text-slate-500 max-w-xs">{tagline}</p>
         </div>
         <div>
           <h4 className="font-semibold mb-3 text-slate-800">Product</h4>
@@ -38,7 +43,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-dark-700 py-4 text-center text-xs text-slate-500">
-        © {year} PFJ — Path For Job. All rights reserved.
+        {copyright}
       </div>
     </footer>
   );

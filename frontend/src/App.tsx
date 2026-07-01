@@ -25,6 +25,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 import Loader from './components/Loader';
+import AnnouncementBanner from './components/AnnouncementBanner';
 import AdminApp from './admin/AdminApp';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -90,6 +91,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ConfigProvider>
+          <AnnouncementBanner />
           <AppRoutes />
         </ConfigProvider>
       </AuthProvider>

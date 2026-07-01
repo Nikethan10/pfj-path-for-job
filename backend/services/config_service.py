@@ -8,7 +8,7 @@ box and admins only override what they change.
 import copy
 from datetime import datetime, timezone
 
-ALLOWED_SECTIONS = {"content", "theme", "features", "nav", "seo", "site"}
+ALLOWED_SECTIONS = {"content", "theme", "features", "nav", "seo", "site", "branding", "announcement"}
 
 DEFAULT_CONFIG = {
     "site": {
@@ -16,6 +16,15 @@ DEFAULT_CONFIG = {
         "tagline": "AI-driven career intelligence for placement readiness.",
         "contactEmail": "support@pathforjob.example",
         "copyright": "© PFJ — Path For Job",
+    },
+    "branding": {
+        "logoUrl": "",
+        "heroImageUrl": "",
+    },
+    "announcement": {
+        "enabled": False,
+        "text": "",
+        "type": "info",
     },
     "content": {
         "hero": {

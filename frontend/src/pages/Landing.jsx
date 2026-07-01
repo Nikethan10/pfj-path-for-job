@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useConfig } from '../context/ConfigContext';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 25 },
@@ -57,6 +58,8 @@ const roleData = {
 };
 
 export default function Landing() {
+  const { config } = useConfig();
+  const hero = config?.content?.hero || {};
   const [activeRole, setActiveRole] = useState('se');
   const activeData = roleData[activeRole];
 
@@ -107,17 +110,21 @@ export default function Landing() {
             className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-[#1e1816]"
             variants={fadeUp} initial="hidden" animate="visible" custom={1}
           >
-            Stop Guessing Your Career.<br />
-            <span className="gradient-text bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#b45309] bg-clip-text text-transparent">
-              Start Navigating It.
-            </span>
+            {hero.title ? hero.title : (
+              <>
+                Stop Guessing Your Career.<br />
+                <span className="gradient-text bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#b45309] bg-clip-text text-transparent">
+                  Start Navigating It.
+                </span>
+              </>
+            )}
           </motion.h1>
 
           <motion.p
             className="text-base md:text-lg text-stone-600 max-w-xl leading-relaxed font-normal"
             variants={fadeUp} initial="hidden" animate="visible" custom={2}
           >
-            PFJ maps your skills, designs study roadmaps, recommends projects, and audits your ATS fit against market standards.
+            {hero.subtitle || 'PFJ maps your skills, designs study roadmaps, recommends projects, and audits your ATS fit against market standards.'}
           </motion.p>
 
           <motion.div
@@ -125,10 +132,10 @@ export default function Landing() {
             variants={fadeUp} initial="hidden" animate="visible" custom={3}
           >
             <Link to="/signup" className="text-sm font-semibold text-white bg-[#9a3412] hover:bg-[#7c2d12] py-3.5 px-8 rounded-xl shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all">
-              Build Your Roadmap
+              {hero.primaryCta || 'Build Your Roadmap'}
             </Link>
             <a href="#how" className="text-sm font-semibold text-stone-600 bg-white border border-[#e8e6e1] hover:bg-stone-50 py-3.5 px-8 rounded-xl hover:-translate-y-0.5 transition-all">
-              How It Works
+              {hero.secondaryCta || 'How It Works'}
             </a>
           </motion.div>
 
