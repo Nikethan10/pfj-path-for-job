@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from '../lib/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { compareCareers } from '../services/analyticsService';
 import { getAvailableRoles } from '../services/skillService';
@@ -33,14 +34,14 @@ export default function CareerCompare() {
   }, []);
 
   const handleCompare = async () => {
-    if (!role1 || !role2 || role1 === role2) return alert('Select two different roles');
+    if (!role1 || !role2 || role1 === role2) return toast.error('Select two different roles');
     setLoading(true);
     try {
       const res = await compareCareers({ role1, role2 });
       setResult(res.data);
       setActiveTab('shared');
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to compare career paths');
+      toast.error(err.response?.data?.detail || 'Failed to compare career paths');
     }
     setLoading(false);
   };

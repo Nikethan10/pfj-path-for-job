@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from '../lib/toast';
 import { motion } from 'framer-motion';
 import { getStudentSkills, getAvailableSkills, addSkill, updateSkill, deleteSkill, bulkAddSkills } from '../services/skillService';
 import { getProfile } from '../services/profileService';
@@ -78,7 +79,7 @@ export default function Skills() {
       await addSkill({ skill_name: skillName, level: 'Beginner', progress_percent: 10 });
       await loadData(filterByAim);
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to add skill');
+      toast.error(err.response?.data?.detail || 'Failed to add skill');
     }
     setAdding(false);
   };
@@ -87,7 +88,7 @@ export default function Skills() {
     if (!userProfile?.target_role) return;
     const toAdd = aimSkills.filter(as => !skills.some(s => s.skill_name === as.skill_name));
     if (toAdd.length === 0) {
-      alert("All skills for your target role are already added!");
+      toast.info("All skills for your target role are already added!");
       return;
     }
     
@@ -104,9 +105,9 @@ export default function Skills() {
       }));
       await bulkAddSkills(skillsToSubmit);
       await loadData(filterByAim);
-      alert(`Successfully added ${toAdd.length} skills to your profile!`);
+      toast.success(`Successfully added ${toAdd.length} skills to your profile!`);
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to bulk add skills');
+      toast.error(err.response?.data?.detail || 'Failed to bulk add skills');
     } finally {
       setBulkAdding(false);
     }
@@ -120,7 +121,7 @@ export default function Skills() {
       await deleteSkill(skillId);
       await loadData(filterByAim);
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to delete skill');
+      toast.error(err.response?.data?.detail || 'Failed to delete skill');
     }
   };
 

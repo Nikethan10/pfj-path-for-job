@@ -26,6 +26,7 @@ import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 import Loader from './components/Loader';
 import AnnouncementBanner from './components/AnnouncementBanner';
+import Toaster from './components/Toaster';
 import AdminApp from './admin/AdminApp';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -93,6 +94,7 @@ export default function App() {
         <ConfigProvider>
           <AnnouncementBanner />
           <AppRoutes />
+          <Toaster />
         </ConfigProvider>
       </AuthProvider>
     </BrowserRouter>

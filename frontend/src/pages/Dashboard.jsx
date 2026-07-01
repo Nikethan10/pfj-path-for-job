@@ -7,6 +7,7 @@ import { getStudentSkills, getAvailableSkills, addSkill, getAvailableRoles } fro
 import { getSummary, getActivityHeatmap } from '../services/analyticsService';
 import { getProjects } from '../services/projectService';
 import Loader from '../components/Loader';
+import { toast } from '../lib/toast';
 
 // Branch options mapping
 const BRANCH_OPTIONS = {
@@ -263,7 +264,7 @@ export default function Dashboard() {
     const role = profile?.target_role || 'Software Engineer';
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert("Popup blocker blocked the report generation. Please allow popups for this site.");
+      toast.error("Popup blocker blocked the report generation. Please allow popups for this site.");
       return;
     }
     const htmlContent = `
@@ -534,7 +535,7 @@ export default function Dashboard() {
       setShowSetup(false);
       setLoading(true);
       await loadData();
-    } catch (err) { alert(err.response?.data?.detail || 'Failed'); }
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed'); }
   };
 
   const handleAddSkill = async () => {
@@ -547,7 +548,7 @@ export default function Dashboard() {
       const sumRes = await getSummary();
       setSummary(sumRes.data);
       setShowSkillModal(false);
-    } catch (err) { alert(err.response?.data?.detail || 'Failed'); }
+    } catch (err) { toast.error(err.response?.data?.detail || 'Failed'); }
   };
 
   const openSkillModal = async () => {

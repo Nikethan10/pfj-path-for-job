@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConfig } from '../context/ConfigContext';
+
+const HeroScene = lazy(() => import('../components/HeroScene'));
 
 const fadeUp = {
   hidden: { opacity: 0, y: 25 },
@@ -62,6 +64,12 @@ export default function Landing() {
   const hero = config?.content?.hero || {};
   const [activeRole, setActiveRole] = useState('se');
   const activeData = roleData[activeRole];
+  const [enable3D] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(min-width: 1024px)').matches &&
+      !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+  );
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-[#1e1816] relative overflow-hidden selection:bg-[#9a3412] selection:text-white font-sans">
@@ -70,6 +78,15 @@ export default function Landing() {
         style={{ background: 'radial-gradient(circle, rgba(154, 52, 18, 0.09) 0%, transparent 70%)' }} />
       <div className="absolute top-[20%] left-[-15%] w-[500px] h-[500px] rounded-full opacity-25 blur-3xl pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(180, 83, 9, 0.07) 0%, transparent 70%)' }} />
+
+      {/* Tasteful 3D accent (desktop only, respects reduced-motion) */}
+      {enable3D && (
+        <div className="absolute top-24 right-0 w-[46%] h-[520px] opacity-40 pointer-events-none hidden lg:block">
+          <Suspense fallback={null}>
+            <HeroScene />
+          </Suspense>
+        </div>
+      )}
 
       {/* Header / Navbar */}
       <header className="sticky top-0 z-50 w-full border-b border-[#e8e6e1] bg-white/75 backdrop-blur-md transition-all duration-300">

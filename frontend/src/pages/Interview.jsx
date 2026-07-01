@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { toast } from '../lib/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getInterviewQuestion, evaluateInterviewAnswer } from '../services/interviewService';
 import { getProfile } from '../services/profileService';
@@ -201,7 +202,7 @@ export default function Interview() {
 
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      alert('Speech Recognition API is not supported in this browser. Try Google Chrome.');
+      toast.info('Voice input is not supported in this browser. You can still type your answers. (Chrome recommended for speech.)');
       return;
     }
     if (isListening) {

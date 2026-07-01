@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from '../lib/toast';
 import { motion } from 'framer-motion';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
@@ -35,7 +36,7 @@ export default function Challenges() {
       setTestResults(null);
     } catch (err) {
       console.error(err);
-      alert('Failed to generate AI coding challenge. Make sure the local LLM model service is running on port 8001.');
+      toast.error('Could not generate an AI coding challenge right now. Please try again in a moment.');
     } finally {
       setGeneratingAI(false);
     }

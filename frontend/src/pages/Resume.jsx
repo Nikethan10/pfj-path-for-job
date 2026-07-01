@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from '../lib/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   analyzeResume, 
@@ -285,7 +286,7 @@ export default function Resume() {
       setText(extractedText);
       setParseStatus('File processed successfully.');
     } catch (err) {
-      alert(err.message || 'Failed to read file.');
+      toast.error(err.message || 'Failed to read file.');
       setFile(null);
       setText('');
       setParseStatus('');
@@ -301,7 +302,7 @@ export default function Resume() {
   };
 
   const handleAnalyze = async () => {
-    if (!text.trim() && !file) return alert('Please upload a file or write/paste resume text.');
+    if (!text.trim() && !file) return toast.error('Please upload a file or write/paste resume text.');
     
     setAnalyzing(true);
     // Switch to upload tab to see telemetry
@@ -321,27 +322,27 @@ export default function Resume() {
       // Select the analytics tab by default to WOW them
       setActiveTab('analytics');
     } catch (err) {
-      alert(err.response?.data?.detail || 'Analysis failed. Make sure your server is running.');
+      toast.error(err.response?.data?.detail || 'Analysis failed. Make sure your server is running.');
     } finally {
       setAnalyzing(false);
     }
   };
 
   const handleJobMatch = async () => {
-    if (!jobDescription.trim()) return alert('Please enter a Job Description to match.');
+    if (!jobDescription.trim()) return toast.error('Please enter a Job Description to match.');
     setMatching(true);
     try {
       const res = await matchJobDescription(jobDescription);
       setMatchResult(res.data);
     } catch (err) {
-      alert(err.response?.data?.detail || 'Matching failed');
+      toast.error(err.response?.data?.detail || 'Matching failed');
     } finally {
       setMatching(false);
     }
   };
 
   const handleRewrite = async () => {
-    if (!bulletToRewrite.trim()) return alert('Please enter a resume bullet point to polish.');
+    if (!bulletToRewrite.trim()) return toast.error('Please enter a resume bullet point to polish.');
     setRewriting(true);
     try {
       const res = await rewriteBulletPoints([bulletToRewrite]);
@@ -349,7 +350,7 @@ export default function Resume() {
         setRewrittenResult(res.data.rewritten_points[0]);
       }
     } catch (err) {
-      alert(err.response?.data?.detail || 'Rewrite failed');
+      toast.error(err.response?.data?.detail || 'Rewrite failed');
     } finally {
       setRewriting(false);
     }
@@ -357,7 +358,7 @@ export default function Resume() {
 
   const handleSocialConnect = async () => {
     if (!githubInput.trim() && !linkedinInput.trim()) {
-      return alert('Provide a GitHub username or LinkedIn text to audit.');
+      return toast.error('Provide a GitHub username or LinkedIn text to audit.');
     }
     setSocialAuditing(true);
     try {
@@ -366,9 +367,9 @@ export default function Resume() {
       // Trigger full refresh of main result to pull new scores
       const getRes = await getResumeAnalysis();
       if (getRes.data) setResult(getRes.data);
-      alert('Social profile audit completed successfully!');
+      toast.success('Social profile audit completed successfully!');
     } catch (err) {
-      alert(err.response?.data?.detail || 'Social audit failed');
+      toast.error(err.response?.data?.detail || 'Social audit failed');
     } finally {
       setSocialAuditing(false);
     }

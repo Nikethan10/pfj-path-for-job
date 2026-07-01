@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { toast } from '../lib/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactFlow, { Background, Controls, Panel, Handle, Position, MarkerType, useNodesState, useEdgesState } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -904,7 +905,7 @@ export default function Roadmap() {
       setQuizQuestions(res.data.questions);
       setQuizToken(res.data.session_id);
     } catch (err) {
-      alert('Failed to generate skill assessment quiz');
+      toast.error('Failed to generate skill assessment quiz');
       setQuizOpen(false);
     }
     setQuizLoading(false);
@@ -914,7 +915,7 @@ export default function Roadmap() {
     const answersList = [];
     for (let i = 0; i < 3; i++) {
       if (userAnswers[i] === undefined) {
-        alert('Please answer all questions before submitting');
+        toast.error('Please answer all questions before submitting');
         return;
       }
       answersList.push(userAnswers[i]);
@@ -932,7 +933,7 @@ export default function Roadmap() {
         loadRoadmap();
       }
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to submit quiz');
+      toast.error(err.response?.data?.detail || 'Failed to submit quiz');
     }
     setQuizSubmitting(false);
   };
@@ -959,7 +960,7 @@ export default function Roadmap() {
         return { ...prev, items: updatedItems };
       });
     } catch { 
-      alert('Failed to update status'); 
+      toast.error('Failed to update status'); 
     }
   }, []);
 
@@ -1118,7 +1119,7 @@ export default function Roadmap() {
       setInitialFitDone(false);
       setSelectedNode(null);
     } catch (err) { 
-      alert(err.response?.data?.detail || 'Failed to generate roadmap'); 
+      toast.error(err.response?.data?.detail || 'Failed to generate roadmap'); 
     }
     setGenerating(false);
   };

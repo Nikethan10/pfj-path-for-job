@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from '../lib/toast';
 import { motion } from 'framer-motion';
 import { getProfile, updateProfile } from '../services/profileService';
 import { getAvailableRoles } from '../services/skillService';
@@ -113,9 +114,9 @@ export default function Settings() {
     setSaving(true);
     try {
       await updateProfile(formData);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to update profile');
+      toast.error(err.response?.data?.detail || 'Failed to update profile');
     }
     setSaving(false);
   };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from '../lib/toast';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
@@ -61,7 +62,7 @@ function useSaver() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e: any) {
-      alert(e?.response?.data?.detail || 'Save failed');
+      toast.error(e?.response?.data?.detail || 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -116,12 +117,12 @@ function Branding({ cfg, refresh }: { cfg: any; refresh: () => void }) {
     try {
       const url = await fileToResizedDataUrl(file, maxDim);
       if (url.length > 900000) {
-        alert('That image is still too large after compression. Please use a smaller one.');
+        toast.error('That image is still too large after compression. Please use a smaller one.');
         return;
       }
       setBranding((b: any) => ({ ...b, [key]: url }));
     } catch {
-      alert('Could not process that image.');
+      toast.error('Could not process that image.');
     } finally {
       setBusy('');
     }
@@ -355,7 +356,7 @@ function Users() {
   useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
   const act = async (fn: () => Promise<any>, confirmMsg?: string) => {
     if (confirmMsg && !window.confirm(confirmMsg)) return;
-    try { await fn(); load(); } catch (e: any) { alert(e?.response?.data?.detail || 'Action failed'); }
+    try { await fn(); load(); } catch (e: any) { toast.error(e?.response?.data?.detail || 'Action failed'); }
   };
   return (
     <div className="glass-card">
@@ -401,7 +402,7 @@ function Admins() {
   useEffect(() => { load(); }, []);
   const add = async () => {
     try { await admin.adminAddAdmin({ email, role }); setEmail(''); load(); }
-    catch (e: any) { alert(e?.response?.data?.detail || 'Could not add admin'); }
+    catch (e: any) { toast.error(e?.response?.data?.detail || 'Could not add admin'); }
   };
   return (
     <div className="space-y-6 max-w-2xl">
