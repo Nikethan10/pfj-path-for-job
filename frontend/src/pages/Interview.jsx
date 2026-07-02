@@ -561,12 +561,15 @@ export default function Interview() {
               {loading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mr-auto flex flex-col items-start">
                   <div className="flex items-center gap-2 mb-1 px-2">
-                    <span className="text-[10px] font-bold text-neon-cyan/50">INTERVIEWER</span>
+                    <span className="text-[10px] font-bold text-neon-cyan/80">INTERVIEWER</span>
                   </div>
-                  <div className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl rounded-tl-none flex gap-1.5 items-center">
-                    <motion.div animate={{ scale: [0.7, 1.2, 0.7] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 bg-neon-cyan rounded-full" />
-                    <motion.div animate={{ scale: [0.7, 1.2, 0.7] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-neon-purple rounded-full" />
-                    <motion.div animate={{ scale: [0.7, 1.2, 0.7] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-neon-pink rounded-full" />
+                  <div className="bg-slate-50 border border-dark-700 px-4 py-3 rounded-xl rounded-tl-none flex gap-3 items-center shadow-sm">
+                    <span className="text-xs text-slate-500 font-medium tracking-wide">Processing response...</span>
+                    <div className="flex gap-1.5">
+                      <motion.div animate={{ scale: [0.7, 1.2, 0.7] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 bg-neon-cyan rounded-full" />
+                      <motion.div animate={{ scale: [0.7, 1.2, 0.7] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-neon-purple rounded-full" />
+                      <motion.div animate={{ scale: [0.7, 1.2, 0.7] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-neon-pink rounded-full" />
+                    </div>
                   </div>
                 </motion.div>
               )}
