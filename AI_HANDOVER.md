@@ -17,6 +17,7 @@ The project is currently a React (Vite) frontend with a FastAPI/Python backend, 
 4. **Platform Credentials**: You have full access to deploy via the following credentials:
    - **Vercel Token**: `vcp_30LedHon0Kepc1Ba3SvtyuQVWlXSbQ64u3dEQGoWhNV9wUe3Bh1IeoqM`
    - **Render Token**: `rnd_It30AemQByjre5pKsEDvWueR5Jsn` (Service ID: `srv-d92digi8qa3s73d7lrpg`)
+   - **GitHub Token**: `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` (Username: `Nikethan10`, Repository: `pfj-path-for-job`)
    - **Firebase Keys**: The Firebase Service Account is saved in `firebase-sa.json`. The web app Firebase config variables are available in `frontend/.env.production`. Please use these keys by whatever means necessary to manage the deployments and database.
 
 5. **Permission Overrides**: If you are running locally (e.g., via Claude Code Desktop) and encounter terminal permission issues that prevent you from executing commands, **do not give up**. Instead, **output the raw shell commands and file changes as text/markdown instructions** so the user can manually copy-paste and execute them.
