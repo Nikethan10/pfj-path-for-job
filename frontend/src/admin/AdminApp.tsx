@@ -135,7 +135,7 @@ function Branding({ cfg, refresh }: { cfg: any; refresh: () => void }) {
         <p className="text-sm text-slate-500 mb-3">Shown top-left across the app. PNG or SVG recommended.</p>
         {branding.logoUrl
           ? <img src={branding.logoUrl} alt="logo" className="h-12 mb-2 rounded bg-white border border-dark-700 p-1" />
-          : <p className="text-xs text-slate-400 mb-2">Using the built-in PFJ mark.</p>}
+          : <p className="text-xs text-slate-400 mb-2">Using the built-in PATH mark.</p>}
         <div className="flex items-center gap-3">
           <input type="file" accept="image/*" onChange={(e) => pick('logoUrl', 256, e.target.files?.[0])} />
           {branding.logoUrl && <button className="text-rose-600 text-sm" onClick={() => setBranding((b: any) => ({ ...b, logoUrl: '' }))}>Remove</button>}
@@ -302,7 +302,7 @@ function Features({ cfg, refresh }: { cfg: any; refresh: () => void }) {
         {Object.keys(features).map((k) => (
           <label key={k} className="flex items-center justify-between py-2 border-b border-dark-700 last:border-0">
             <span className="capitalize text-slate-700 font-medium">{k}</span>
-            <input type="checkbox" checked={features[k] !== false} onChange={(e) => setFeatures({ ...features, [k]: e.target.checked })} className="w-5 h-5 accent-[var(--pfj-primary)]" />
+            <input type="checkbox" checked={features[k] !== false} onChange={(e) => setFeatures({ ...features, [k]: e.target.checked })} className="w-5 h-5 accent-[var(--PATH-primary)]" />
           </label>
         ))}
       </div>

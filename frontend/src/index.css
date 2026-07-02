@@ -4,12 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── THEME VARIABLES (overridden at runtime by the admin Theme settings) ─── */
 :root {
-  --pfj-primary: #166534;
-  --pfj-accent: #d97706;
-  --pfj-secondary: #be123c;
-  --pfj-radius: 0.75rem;
+  --path-blue: #0a66c2;
 }
 
 /* ─── BASE STYLES ────────────────────────────────────── */
@@ -21,88 +17,48 @@
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background: #faf9f6;
-  color: #1a1f16;
+  background: #ffffff;
+  color: #111111;
   min-height: 100vh;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ─── SCROLLBAR ──────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #faf9f6;
+  background: #f8fafc;
 }
 ::-webkit-scrollbar-thumb {
-  background: #166534;
-  border-radius: 3px;
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-/* ─── GLASSMORPHISM UTILITY ──────────────────────────── */
+/* ─── COMPONENT UTILITIES ──────────────────────────── */
 @layer components {
-  .glass {
-    @apply bg-dark-800 border border-dark-700 rounded-2xl;
-  }
-  .glass-card {
-    @apply bg-dark-800 border border-dark-700 rounded-2xl p-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)];
-  }
-  .glass-card:hover {
-    @apply border-dark-600 -translate-y-1 shadow-card-hover;
-  }
-  .glass-sidebar {
-    @apply bg-dark-800 border-r border-dark-700;
-  }
   .btn-primary {
-    @apply text-white font-semibold py-3 px-6 rounded-xl
-           transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-card-hover active:scale-[0.98];
-    background-color: var(--pfj-primary);
+    @apply bg-path-black text-white font-medium py-2.5 px-5 rounded-lg
+           transition-colors duration-200 hover:bg-gray-800;
   }
   .btn-secondary {
-    @apply bg-dark-800 border border-dark-700 text-slate-800 font-medium py-3 px-6 rounded-xl
-           transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-dark-700 hover:border-dark-600 hover:-translate-y-0.5;
+    @apply bg-white border border-path-border text-path-black font-medium py-2.5 px-5 rounded-lg
+           transition-colors duration-200 hover:bg-gray-50;
   }
   .input-field {
-    @apply w-full bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-slate-800 placeholder-gray-500
-           focus:outline-none focus:border-neon-cyan/60 focus:ring-1 focus:ring-neon-cyan/40 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)];
+    @apply w-full bg-white border border-path-border rounded-lg px-4 py-3 text-path-black placeholder-gray-400
+           focus:outline-none focus:border-path-blue focus:ring-1 focus:ring-path-blue transition-colors duration-200;
   }
-  .badge {
-    @apply px-3 py-1 rounded-full text-xs font-semibold;
+  .glass-card {
+    @apply bg-white border border-path-border rounded-xl p-6 shadow-card transition-shadow duration-300 hover:shadow-card-hover;
   }
-  .badge-cyan {
-    @apply badge bg-neon-cyan/20 text-neon-cyan;
+  .glass-sidebar {
+    @apply bg-white border-r border-path-border;
   }
-  .badge-purple {
-    @apply badge bg-neon-purple/20 text-neon-purple;
-  }
-  .badge-pink {
-    @apply badge bg-neon-pink/20 text-neon-pink;
-  }
-  .section-title {
-    @apply text-2xl font-bold bg-gradient-to-r from-neon-cyan to-neon-purple bg-clip-text text-transparent;
-  }
-  select.input-field option {
-    background-color: #ffffff;
-    color: #1a1f16;
-  }
-}
-
-/* ─── GRADIENT TEXT ───────────────────────────────────── */
-.gradient-text {
-  background: linear-gradient(135deg, #166534, #be123c);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ─── ANIMATED BACKGROUND ────────────────────────────── */
-.bg-grid {
-  background-color: transparent;
-}
-
-/* ─── RADIAL GLOW ────────────────────────────────────── */
-.glow-orb {
-  display: none;
 }
 
 /* Hide native Edge/IE password reveal and clear button */
@@ -111,99 +67,10 @@ input::-ms-clear {
   display: none;
 }
 
-/* ─── REACT FLOW PREMIUM CURSORS & OVERRIDES ─────────── */
+/* React Flow overwrites */
 .react-flow__pane {
   cursor: grab !important;
 }
 .react-flow__pane:active {
   cursor: grabbing !important;
 }
-.react-flow__node {
-  cursor: pointer !important;
-}
-.react-flow__edge {
-  cursor: pointer !important;
-}
-.react-flow__handle {
-  cursor: crosshair !important;
-}
-
-/* Custom premium hover shadows and transitions for nodes */
-.react-flow__node-custom:hover {
-  z-index: 100 !important;
-}
-
-
-/* React Flow controls premium dark styling */
-.react-flow__controls {
-  border-radius: 12px !important;
-  overflow: hidden !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid #1e293b !important;
-}
-.react-flow__controls-button {
-  background: #1e293b !important;
-  border-bottom: 1px solid #334155 !important;
-  color: #94a3b8 !important;
-  fill: #94a3b8 !important;
-  transition: all 0.2s !important;
-}
-.react-flow__controls-button:hover {
-  background: #334155 !important;
-  color: #f8fafc !important;
-  fill: #f8fafc !important;
-}
-
-/* Aurora Canvas Mesh Gradient Background (Medium Dark Theme) */
-.aurora-canvas {
-  background: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.22) 0px, transparent 50%),
-              radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.22) 0px, transparent 50%),
-              radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.18) 0px, transparent 50%),
-              radial-gradient(at 0% 100%, rgba(236, 72, 153, 0.18) 0px, transparent 50%),
-              #0f172a !important; /* Rich Slate-900 Medium Dark Base */
-}
-
-/* Quiz Scrollbar Custom Styling (Sleek Dark Theme) */
-.quiz-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.quiz-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.quiz-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155 !important; /* Slate-700 */
-  border-radius: 9999px !important;
-}
-.quiz-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #475569 !important; /* Slate-600 */
-}
-
-/* Custom Dark Scrollbar for Modal and Drawer components */
-.dark-scrollbar::-webkit-scrollbar {
-  width: 6px !important;
-  height: 6px !important;
-}
-.dark-scrollbar::-webkit-scrollbar-track {
-  background: transparent !important;
-}
-.dark-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3) !important; /* Slate-400 with opacity */
-  border-radius: 9999px !important;
-}
-.dark-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5) !important;
-}
-
-/* ─── ROADMAP PAGE BODY SCROLLBAR OVERRIDE ───────────── */
-body:has(.roadmap-page)::-webkit-scrollbar-track {
-  background: #0f172a !important;
-}
-body:has(.roadmap-page)::-webkit-scrollbar-thumb {
-  background: #334155 !important;
-  border-radius: 9999px !important;
-}
-body:has(.roadmap-page)::-webkit-scrollbar-thumb:hover {
-  background: #475569 !important;
-}
-
-

@@ -4,7 +4,7 @@ export default function Terms() {
   return (
     <PublicPage title="Terms of Use" subtitle="Last updated: June 30, 2026">
       <p>
-        These Terms of Use ("Terms") govern your access to and use of PFJ — Path For Job (the "Service"). By
+        These Terms of Use ("Terms") govern your access to and use of PATH — Placement And Talent Hub (the "Service"). By
         creating an account or using the Service, you agree to these Terms.
       </p>
 
@@ -23,7 +23,7 @@ export default function Terms() {
 
       <h2 className="text-xl font-bold text-slate-800 pt-2">3. Your content</h2>
       <p>
-        You retain ownership of the resumes, profile details, and other content you submit. You grant PFJ a
+        You retain ownership of the resumes, profile details, and other content you submit. You grant PATH a
         limited license to process that content solely to provide the Service's features to you.
       </p>
 
@@ -41,7 +41,7 @@ export default function Terms() {
 
       <h2 className="text-xl font-bold text-slate-800 pt-2">6. Limitation of liability</h2>
       <p>
-        To the maximum extent permitted by law, PFJ is not liable for any indirect, incidental, or consequential
+        To the maximum extent permitted by law, PATH is not liable for any indirect, incidental, or consequential
         damages arising from your use of the Service.
       </p>
 

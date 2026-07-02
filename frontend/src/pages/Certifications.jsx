@@ -33,7 +33,7 @@ export default function Certifications() {
 
       // Fetch LocalStorage progress configuration
       try {
-        const savedProgress = localStorage.getItem('pfj_certifications_progress');
+        const savedProgress = localStorage.getItem('PATH_certifications_progress');
         if (savedProgress) {
           setProgress(JSON.parse(savedProgress));
         }
@@ -46,7 +46,7 @@ export default function Certifications() {
   const handleUpdateStatus = (certId, status) => {
     const updated = { ...progress, [certId]: status };
     setProgress(updated);
-    localStorage.setItem('pfj_certifications_progress', JSON.stringify(updated));
+    localStorage.setItem('PATH_certifications_progress', JSON.stringify(updated));
     // Synced status inside the modal as well if active
     if (selectedCert && selectedCert.id === certId) {
       setSelectedCert(prev => ({ ...prev, status }));

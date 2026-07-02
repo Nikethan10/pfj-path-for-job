@@ -26,8 +26,8 @@ export default function Skills() {
     const handleRefresh = () => {
       loadData(filterByAim);
     };
-    window.addEventListener('pfj_refresh_data', handleRefresh);
-    return () => window.removeEventListener('pfj_refresh_data', handleRefresh);
+    window.addEventListener('PATH_refresh_data', handleRefresh);
+    return () => window.removeEventListener('PATH_refresh_data', handleRefresh);
   }, [filterByAim]);
 
   const loadData = async (aimOnly = true) => {

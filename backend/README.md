@@ -1,71 +1,33 @@
-# PFJ Backend (FastAPI)
+# PATH Backend (FastAPI)
 
-The API and AI engine for PFJ. Firebase/Firestore is the live data store; Groq/Gemini power AI features
-with built-in fallbacks so everything works even with no AI keys configured.
+Welcome to the backend service for **PATH (Placement And Talent Hub)**. This is a high-performance REST API built using FastAPI, serving AI-driven insights, user profiles, and placement metrics for the platform.
 
-## Run locally
+## Architecture
 
-```bash
-python -m venv venv
-# Windows: venv\Scripts\activate   |   macOS/Linux: source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env                 # fill in values
-# place Firebase service account at config/firebase-service-account.json
-uvicorn main:app --reload
-```
+The backend follows a modular, route-based MVC pattern. It is designed to be easily extensible and completely stateless for horizontal scalability.
 
-- API root: `http://localhost:8000`  •  Interactive docs: `/docs` (hidden when `ENV=production`)
-- Health check: `GET /api/health`
+### Directory Structure
 
-## Tests
+- **`config/`**: Configuration management. Loads and parses environment variables using Pydantic `BaseSettings`.
+- **`data/`**: Static or seed data used for populating default skills, roles, and project templates.
+- **`database/`**: Database connections. Primarily interfaces with Firebase Firestore via the `firebase-admin` SDK.
+- **`middleware/`**: Custom HTTP middleware. Includes:
+  - `auth.py`: JWT token verification and user context injection.
+  - `security.py`: Rate limiting (using `slowapi`) and IP tracking.
+- **`routes/`**: FastAPI route controllers. Each major feature (Auth, Profile, Skills, Roadmap, etc.) has its own dedicated `APIRouter`.
+- **`schemas/`**: Pydantic models for request/response validation. Ensures strict typing of all incoming and outgoing data payloads.
+- **`services/`**: Core business logic and integrations (e.g., AI logic, data processing).
+- **`utils/`**: Shared helper functions (logging, formatting, etc.).
 
-```bash
-pip install -r requirements-dev.txt
-pytest                 # smoke tests (no Firebase creds needed)
-```
+## Security Features
 
-## Folder map
+1. **Firebase Authentication:** All protected endpoints require a valid Firebase ID token. The `verify_token` dependency ensures that requests missing a valid token receive a `401 Unauthorized`.
+2. **Rate Limiting:** Global rate limiting is implemented to prevent abuse and brute-force attacks.
+3. **CORS Policies:** Configured in `main.py` via `CORSMiddleware`, restricting access strictly to defined production origins.
+4. **Data Validation:** Pydantic guarantees that malformed requests are rejected with a `422 Unprocessable Entity` before hitting any business logic.
 
-| Folder | Purpose |
-|--------|---------|
-| `config/` | Env-driven settings (`get_settings`). |
-| `database/` | Firebase Admin init; `get_firestore`, `get_rtdb`, `verify_token`. |
-| `middleware/` | slowapi rate limiter setup. |
-| `ml/` | Heuristics + AI-backed generators (challenges, interview, scoring, skill gap). |
-| `routes/` | API endpoints (one router per domain). |
-| `schemas/` | Pydantic request/response models. |
-| `services/` | Business logic (AI, resume, badges, github, recommendations, scoring, activity). |
-| `utils/` | `verify_token` dependency (Firebase ID-token verification). |
-| `data/` | Static catalogs (e.g. `badges.json`). |
-| `tests/` | Pytest smoke tests. |
+## Getting Started
 
-## Security model
-
-- **Auth:** every protected route depends on `verify_token` (Firebase ID token → uid). Data is namespaced
-  under `users/{uid}/**`, so users only ever read/write their own documents.
-- **CORS:** restricted to `ALLOWED_ORIGINS` (no wildcard).
-- **Headers:** `X-Content-Type-Options`, `X-Frame-Options: DENY`, CSP `frame-ancestors 'none'`,
-  `Referrer-Policy`, plus HSTS + HTTPS redirect when `ENV=production`.
-- **Rate limiting:** applied to auth and all AI/upload endpoints.
-- **Quiz integrity:** correct answers are stored server-side per session and never sent to the client.
-- **Uploads:** resume uploads are capped at 5 MB and validated by extension **and** magic bytes (PDF/DOCX).
-
-### Recommended Firestore security rules (defense in depth)
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{db}/documents {
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
-    match /skills/{doc} { allow read: if request.auth != null; }
-  }
-}
-```
-
-## Notes
-
-- The previous local Qwen "model service" (port 8001) and the abandoned SQLite layer were removed; AI now
-  runs through `services/ai_service` (Groq → Gemini) with static fallbacks.
-- Never commit `.env` or `config/firebase-service-account.json` (both are gitignored).
+1. **Environment Setup:** Ensure you have a `.env` file based on `.env.example`.
+2. **Install Dependencies:** `pip install -r requirements.txt`
+3. **Run Server:** `uvicorn main:app --reload`

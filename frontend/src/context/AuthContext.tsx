@@ -15,28 +15,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('pfj_token');
-    const userData = localStorage.getItem('pfj_user');
+    const token = localStorage.getItem('PATH_token');
+    const userData = localStorage.getItem('PATH_user');
     if (token && userData) {
       try {
         setUser(JSON.parse(userData) as AuthUser);
       } catch {
-        localStorage.removeItem('pfj_user');
+        localStorage.removeItem('PATH_user');
       }
     }
     setLoading(false);
   }, []);
 
   const loginUser = (data: AuthUser, firebaseToken: string) => {
-    localStorage.setItem('pfj_token', firebaseToken);
+    localStorage.setItem('PATH_token', firebaseToken);
     const u: AuthUser = { uid: data.uid, name: data.name, email: data.email };
-    localStorage.setItem('pfj_user', JSON.stringify(u));
+    localStorage.setItem('PATH_user', JSON.stringify(u));
     setUser(u);
   };
 
   const logoutUser = () => {
-    localStorage.removeItem('pfj_token');
-    localStorage.removeItem('pfj_user');
+    localStorage.removeItem('PATH_token');
+    localStorage.removeItem('PATH_user');
     setUser(null);
   };
 

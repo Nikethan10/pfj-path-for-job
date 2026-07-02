@@ -55,7 +55,12 @@ def add_skill(
         skill_id = s.id
         
     if not skill_doc_data:
-        raise HTTPException(status_code=404, detail=f"Skill '{data.skill_name}' not found in catalog")
+        # Instead of failing, just add it as a custom skill
+        skill_doc_data = {
+            "skill_name": data.skill_name,
+            "category": "Custom"
+        }
+        skill_id = data.skill_name.lower().replace(" ", "-")
 
     user_skill_ref = db.collection("users").document(uid).collection("skills").document(data.skill_name)
     if user_skill_ref.get().exists:
@@ -97,8 +102,11 @@ def add_skills_bulk(
             skill_id = s.id
         
         if not skill_doc_data:
-            skipped_skills.append({"skill_name": item.skill_name, "reason": "Not found in catalog"})
-            continue
+            skill_doc_data = {
+                "skill_name": item.skill_name,
+                "category": "Custom"
+            }
+            skill_id = item.skill_name.lower().replace(" ", "-")
             
         user_skill_doc = user_skills_ref.document(item.skill_name)
         if user_skill_doc.get().exists:

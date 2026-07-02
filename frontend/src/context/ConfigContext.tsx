@@ -13,10 +13,10 @@ const ConfigContext = createContext<ConfigValue | null>(null);
 function applyTheme(theme: any) {
   if (!theme) return;
   const root = document.documentElement;
-  if (theme.primary) root.style.setProperty('--pfj-primary', theme.primary);
-  if (theme.accent) root.style.setProperty('--pfj-accent', theme.accent);
-  if (theme.secondary) root.style.setProperty('--pfj-secondary', theme.secondary);
-  if (theme.radius) root.style.setProperty('--pfj-radius', theme.radius);
+  if (theme.primary) root.style.setProperty('--PATH-primary', theme.primary);
+  if (theme.accent) root.style.setProperty('--PATH-accent', theme.accent);
+  if (theme.secondary) root.style.setProperty('--PATH-secondary', theme.secondary);
+  if (theme.radius) root.style.setProperty('--PATH-radius', theme.radius);
 }
 
 export function ConfigProvider({ children }: { children: ReactNode }) {

@@ -1,7 +1,7 @@
 import { useConfig } from '../context/ConfigContext';
 
 const STYLES: Record<string, string> = {
-  info: 'bg-[var(--pfj-primary)] text-white',
+  info: 'bg-[var(--PATH-primary)] text-white',
   success: 'bg-emerald-600 text-white',
   warning: 'bg-amber-500 text-slate-900',
 };

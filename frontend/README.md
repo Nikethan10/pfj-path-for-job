@@ -1,47 +1,36 @@
-# PFJ Frontend (React + Vite + TypeScript)
+# PATH Frontend
 
-Single-page app for PFJ. Tailwind for styling, Firebase client SDK for auth, axios for API calls,
-framer-motion for animation, recharts/reactflow/Monaco for the richer pages.
+Welcome to the frontend application for **PATH (Placement And Talent Hub)**. 
+Built using React, Vite, and TailwindCSS, this Single Page Application (SPA) delivers a sleek, responsive, and highly interactive user experience.
 
-## Run locally
+## Architecture
 
-```bash
-npm install
-cp .env.example .env.local      # Firebase web config + VITE_API_BASE_URL
-npm run dev                      # http://localhost:5173
-```
+The application is structured to decouple UI components from state management and API services, allowing for easy testing and rapid iteration.
 
-## Scripts
+### Directory Structure
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start the Vite dev server. |
-| `npm run build` | Type-check (`tsc`) then build the production bundle. |
-| `npm run preview` | Preview the production build locally. |
-| `npm run typecheck` | Type-check only. |
+- **`src/`**
+  - **`assets/`**: Static media (images, icons, etc.) not handled by the public directory.
+  - **`components/`**: Reusable UI elements (Buttons, Layouts, Navigation, Modals). These components should ideally be "dumb" (presentation-only) where possible.
+  - **`context/`**: React Context providers for global state (e.g., Theme, Config).
+  - **`pages/`**: View-level components mapping directly to routing (e.g., `Landing.jsx`, `Dashboard.jsx`).
+  - **`services/`**: API integration layers. Uses Axios to communicate with the FastAPI backend. All network requests and error parsing logic live here.
+  - **`firebase.ts`**: Firebase SDK configuration and initialization.
 
-## Folder map
+## Design System
 
-| Folder | Purpose |
-|--------|---------|
-| `src/components/` | Reusable UI (Logo, Sidebar, Footer, Loader, BotAssistant, PublicPage). |
-| `src/context/` | `AuthContext` (auth state + login/logout). |
-| `src/layouts/` | `DashboardLayout` (sidebar + assistant shell for protected routes). |
-| `src/pages/` | One component per route (public + dashboard pages). |
-| `src/services/` | `api.ts` (axios client with token refresh) + per-domain service calls. |
-| `src/data/` | Static front-end datasets (e.g. certifications). |
-| `src/types/` | Shared TypeScript interfaces. |
+The platform uses a custom **TailwindCSS** configuration (`tailwind.config.js`) to enforce brand consistency.
+- **Brand Colors:** Primary (`#0a66c2` Blue), Backgrounds (White & `#f8fafc` Gray), Typography (`#111111` Black).
+- **Typography:** The `Inter` font is used globally for a clean, modern aesthetic.
+- **Global Styles:** Handled in `index.css`, heavily relying on Tailwind `@layer components` to create reusable utility classes like `.btn-primary` and `.input-field`.
 
-## Conventions
+## Deployment
 
-- **TypeScript:** new and shell code is `.tsx`/`.ts`. The migration is incremental — some feature pages are
-  still `.jsx` and compile via `allowJs` (not type-checked) until converted. Prefer `.tsx` for new work.
-- **API base URL** comes from `VITE_API_BASE_URL` (defaults to `http://localhost:8000`). Never hardcode it.
-- **Auth tokens:** the axios client attaches the Firebase ID token and silently refreshes it on a 401 before
-  signing the user out.
-- **Styling:** Tailwind utility classes plus shared component classes in `src/index.css`
-  (`glass-card`, `btn-primary`, `badge-*`, `input-field`, ...). Reskin via these tokens, not per-page.
+The application is configured to deploy seamlessly to **Vercel**.
+Routing is handled client-side via React Router. The `vercel.json` file ensures that all server requests are rewritten to `index.html` to prevent 404 errors on deep-links.
 
-## Deploy (Vercel)
+## Getting Started
 
-Set the project root to `frontend/`, add the `VITE_*` env vars, and let `vercel.json` handle SPA routing.
+1. **Environment Setup:** Copy `.env.example` to `.env.local` and add your Firebase configurations.
+2. **Install Dependencies:** `npm install`
+3. **Run Development Server:** `npm run dev`

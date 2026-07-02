@@ -26,8 +26,8 @@ export default function Projects() {
     const handleRefresh = () => {
       loadData();
     };
-    window.addEventListener('pfj_refresh_data', handleRefresh);
-    return () => window.removeEventListener('pfj_refresh_data', handleRefresh);
+    window.addEventListener('PATH_refresh_data', handleRefresh);
+    return () => window.removeEventListener('PATH_refresh_data', handleRefresh);
   }, []);
 
   const loadData = async () => {

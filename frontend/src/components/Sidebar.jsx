@@ -173,8 +173,8 @@ export default function Sidebar({ isExpanded, setIsExpanded, mobileOpen = false,
                 transition={{ duration: 0.15 }}
                 className="flex flex-col whitespace-nowrap overflow-hidden text-left"
               >
-                <h1 className="text-sm font-extrabold tracking-wider leading-none text-[#1a1f16]">PFJ</h1>
-                <span className="text-[8px] text-[#166534] font-bold uppercase tracking-widest leading-none block mt-0.5">Path For Job</span>
+                <h1 className="text-sm font-extrabold tracking-wider leading-none text-[#1a1f16]">PATH</h1>
+                <span className="text-[8px] text-[#166534] font-bold uppercase tracking-widest leading-none block mt-0.5">Placement And Talent Hub</span>
               </motion.div>
             )}
           </AnimatePresence>

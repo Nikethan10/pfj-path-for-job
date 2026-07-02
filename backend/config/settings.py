@@ -9,7 +9,9 @@ class Settings(BaseSettings):
 
     # ── AI providers (optional; features fall back to built-in content) ──
     GEMINI_API_KEY: str = ""
+    GEMINI_API_KEY_2: str = ""
     GROQ_API_KEY: str = ""
+    GROQ_API_KEY_2: str = ""
     GITHUB_TOKEN: str = ""
 
     # ── Firebase (required for auth + Firestore) ──

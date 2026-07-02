@@ -75,13 +75,13 @@ export default function Login() {
           <div className="relative z-10">
             <Link to="/" className="inline-flex items-center gap-2.5 group">
               <span className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center font-black text-white text-sm border border-white/10">P</span>
-              <span className="text-white/90 font-bold text-sm tracking-wider">PFJ</span>
+              <span className="text-white/90 font-bold text-sm tracking-wider">PATH</span>
             </Link>
           </div>
           <div className="relative z-10 space-y-5">
             <h2 className="text-[28px] font-extrabold text-white leading-[1.2] tracking-tight">Navigate your<br />career with clarity.</h2>
           </div>
-          <p className="relative z-10 text-[10px] text-white/30 font-medium">© 2026 Path For Job</p>
+          <p className="relative z-10 text-[10px] text-white/30 font-medium">© 2026 Placement And Talent Hub</p>
         </div>
 
         {/* Right Pane */}

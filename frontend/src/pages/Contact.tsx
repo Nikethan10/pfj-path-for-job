@@ -6,7 +6,7 @@ export default function Contact() {
   return (
     <PublicPage title="Contact us" subtitle="We'd love to hear from you.">
       <p>
-        Questions, feedback, or a bug to report? Reach the PFJ team and we'll get back to you as soon as we can.
+        Questions, feedback, or a bug to report? Reach the PATH team and we'll get back to you as soon as we can.
       </p>
 
       <div className="not-prose grid gap-4 sm:grid-cols-2 my-6">

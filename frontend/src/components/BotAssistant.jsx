@@ -20,7 +20,7 @@ export default function BotAssistant() {
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setMessages([
-        { sender: 'bot', text: `${getGreeting()}! I'm your PFJ Assistant . I can help you navigate or answer questions about the platform. What can I do for you today?` }
+        { sender: 'bot', text: `${getGreeting()}! I'm your PATH Assistant . I can help you navigate or answer questions about the platform. What can I do for you today?` }
       ]);
     }
     // Scroll to bottom when messages change
@@ -46,7 +46,7 @@ export default function BotAssistant() {
       
       // Handle dynamic data refresh actions from assistant
       if (data.action && data.action.type === 'refresh_data') {
-        const event = new CustomEvent('pfj_refresh_data', { detail: data.action });
+        const event = new CustomEvent('PATH_refresh_data', { detail: data.action });
         window.dispatchEvent(event);
       }
 
@@ -108,7 +108,7 @@ export default function BotAssistant() {
                   </svg>
                 </span>
                 <div>
-                  <h3 className="font-bold text-white">PFJ Assistant</h3>
+                  <h3 className="font-bold text-white">PATH Assistant</h3>
                   <p className="text-xs text-emerald-400 font-bold">{isThinking ? 'Thinking...' : 'Online'}</p>
                 </div>
               </div>

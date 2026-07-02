@@ -4,7 +4,7 @@ export default function Privacy() {
   return (
     <PublicPage title="Privacy Policy" subtitle="Last updated: June 30, 2026">
       <p>
-        This Privacy Policy explains what information PFJ — Path For Job (the "Service") collects, how it is
+        This Privacy Policy explains what information PATH — Placement And Talent Hub (the "Service") collects, how it is
         used, and the choices you have.
       </p>
 

@@ -9,7 +9,7 @@ export default function Footer() {
     || 'AI-driven career intelligence that helps students become placement-ready.';
   const copyright = config?.site?.copyright
     ? `${config.site.copyright} · All rights reserved.`
-    : `© ${year} PFJ — Path For Job. All rights reserved.`;
+    : `© ${year} PATH — Placement And Talent Hub. All rights reserved.`;
   return (
     <footer className="border-t border-dark-700 bg-dark-800">
       <div className="max-w-5xl mx-auto px-6 py-10 grid gap-8 grid-cols-2 md:grid-cols-4 text-sm">

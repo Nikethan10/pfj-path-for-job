@@ -11,7 +11,7 @@ const API = axios.create({
 
 // Attach the stored Firebase ID token to every request.
 API.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('pfj_token');
+  const token = localStorage.getItem('PATH_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -33,7 +33,7 @@ API.interceptors.response.use(
         const current = auth.currentUser;
         if (current) {
           const fresh = await current.getIdToken(true);
-          localStorage.setItem('pfj_token', fresh);
+          localStorage.setItem('PATH_token', fresh);
           original.headers.Authorization = `Bearer ${fresh}`;
           return API(original);
         }
@@ -42,8 +42,8 @@ API.interceptors.response.use(
       }
 
       const isAuthPage = ['/login', '/signup'].includes(window.location.pathname);
-      localStorage.removeItem('pfj_token');
-      localStorage.removeItem('pfj_user');
+      localStorage.removeItem('PATH_token');
+      localStorage.removeItem('PATH_user');
       if (!isAuthPage) window.location.replace('/login');
     }
 

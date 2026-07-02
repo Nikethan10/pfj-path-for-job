@@ -8,15 +8,6 @@ challenges, surfaces matching jobs, and rewards real progress with achievement b
 
 ---
 
-## ⚠️ Security notice — rotate the previously committed keys
-
-Earlier versions of this project committed live secrets to the source tree. **Before deploying, you must
-rotate every one of these in their respective consoles** (the old values must be considered compromised):
-
-- **Firebase service account** — regenerate the private key (Google Cloud Console → IAM → Service Accounts).
-- **Gemini API key** — regenerate (Google AI Studio).
-- **Groq API key** — regenerate (Groq console).
-- **Firebase Realtime DB secret** — rotate (Firebase console → Project settings → Service accounts → DB secrets).
 
 All secrets are now loaded from environment variables / ignored files and are excluded by `.gitignore`.
 Never commit `.env`, `*.local`, `*-service-account.json`, or `*.db`.

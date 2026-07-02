@@ -31,11 +31,15 @@ def clean_json_response(text: str) -> str:
     return text
 
 
+import random
+
 def get_gemini_client():
     settings = get_settings()
-    if settings.GEMINI_API_KEY and HAS_GEMINI:
+    keys = [k for k in [settings.GEMINI_API_KEY, settings.GEMINI_API_KEY_2] if k]
+    if keys and HAS_GEMINI:
         try:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
+            selected_key = random.choice(keys)
+            genai.configure(api_key=selected_key)
             return genai.GenerativeModel('gemini-2.5-flash')
         except Exception as e:
             logger.error(f"Failed to initialize Gemini client: {e}")
@@ -43,9 +47,11 @@ def get_gemini_client():
 
 def get_groq_client():
     settings = get_settings()
-    if settings.GROQ_API_KEY and HAS_OPENAI:
+    keys = [k for k in [settings.GROQ_API_KEY, settings.GROQ_API_KEY_2] if k]
+    if keys and HAS_OPENAI:
         try:
-            return OpenAI(api_key=settings.GROQ_API_KEY, base_url="https://api.groq.com/openai/v1")
+            selected_key = random.choice(keys)
+            return OpenAI(api_key=selected_key, base_url="https://api.groq.com/openai/v1")
         except Exception as e:
             logger.error(f"Failed to initialize Groq client: {e}")
     return None

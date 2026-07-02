@@ -7,7 +7,7 @@ interface LogoProps {
 }
 
 /**
- * PFJ brand mark: a route/path line forming a "P" topped with a location pin.
+ * PATH brand mark: a route/path line forming a "P" topped with a location pin.
  * If an admin has uploaded a custom logo (config.branding.logoUrl), that is shown instead.
  */
 export default function Logo({ size = 32, withWordmark = false, className = '' }: LogoProps) {
@@ -19,7 +19,7 @@ export default function Logo({ size = 32, withWordmark = false, className = '' }
       {logoUrl ? (
         <img src={logoUrl} alt={config?.site?.name || 'Logo'} style={{ height: size }} className="w-auto object-contain" />
       ) : (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="PFJ" role="img">
+        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="PATH" role="img">
           <rect width="64" height="64" rx="15" fill="#166534" />
           <path
             d="M22 50 V26 a10 10 0 0 1 10 -10 h3 a9 9 0 0 1 0 18 h-7"
@@ -33,7 +33,7 @@ export default function Logo({ size = 32, withWordmark = false, className = '' }
         </svg>
       )}
       {withWordmark && !logoUrl && (
-        <span className="font-extrabold tracking-tight text-slate-800 text-lg leading-none">PFJ</span>
+        <span className="font-extrabold tracking-tight text-slate-800 text-lg leading-none">PATH</span>
       )}
     </span>
   );

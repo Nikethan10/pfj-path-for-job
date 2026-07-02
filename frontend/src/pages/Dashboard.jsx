@@ -270,7 +270,7 @@ export default function Dashboard() {
     const htmlContent = `
       <html>
         <head>
-          <title>PFJ Future Skills Report - ${role}</title>
+          <title>PATH Future Skills Report - ${role}</title>
           <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
           <style>
             body {
@@ -365,7 +365,7 @@ export default function Dashboard() {
         </head>
         <body>
           <div class="header">
-            <div class="logo">PFJ (Path For Job)</div>
+            <div class="logo">PATH (Placement And Talent Hub)</div>
             <div class="title">Placement Market Intelligence & Future Skills Report</div>
             <div class="subtitle">AI-Powered Placement Intelligence & Future Skills Analytics Platform</div>
           </div>
@@ -436,7 +436,7 @@ export default function Dashboard() {
           </p>
 
           <div class="footer">
-            &copy; ${new Date().getFullYear()} PFJ (Path For Job). Confidential. Powered by PFJ AI Placement Intelligence.
+            &copy; ${new Date().getFullYear()} PATH (Placement And Talent Hub). Confidential. Powered by PATH AI Placement Intelligence.
           </div>
 
           <script>
@@ -462,8 +462,8 @@ export default function Dashboard() {
     const handleRefresh = () => {
       loadData();
     };
-    window.addEventListener('pfj_refresh_data', handleRefresh);
-    return () => window.removeEventListener('pfj_refresh_data', handleRefresh);
+    window.addEventListener('PATH_refresh_data', handleRefresh);
+    return () => window.removeEventListener('PATH_refresh_data', handleRefresh);
   }, []);
 
   const loadData = async () => {

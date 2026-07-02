@@ -1065,8 +1065,8 @@ export default function Roadmap() {
       loadRoadmap();
       loadProjects();
     };
-    window.addEventListener('pfj_refresh_data', handleRefresh);
-    return () => window.removeEventListener('pfj_refresh_data', handleRefresh);
+    window.addEventListener('PATH_refresh_data', handleRefresh);
+    return () => window.removeEventListener('PATH_refresh_data', handleRefresh);
   }, []);
 
   // 1. Sync roadmap items to React Flow nodes/edges

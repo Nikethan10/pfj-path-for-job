@@ -11,12 +11,12 @@ const STEPS = [
 export default function About() {
   return (
     <PublicPage
-      title="How PFJ works"
-      subtitle="PFJ — Path For Job — is an AI-driven career intelligence platform that helps students become placement-ready."
+      title="How PATH works"
+      subtitle="PATH — Placement And Talent Hub — is an AI-driven career intelligence platform that helps students become placement-ready."
     >
       <p>
         Landing a great first role is hard when you don't know what to learn, how your resume reads to a
-        recruiter, or where your gaps are. PFJ turns that uncertainty into a clear, measurable plan.
+        recruiter, or where your gaps are. PATH turns that uncertainty into a clear, measurable plan.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2 not-prose my-8">

@@ -484,7 +484,7 @@ export default function Jobs() {
                   </div>
 
                   {/* Action CTA Footer */}
-                  <div className="border-t border-dark-700 pt-5 mt-6 flex justify-end gap-3">
+                  <div className="border-t border-dark-700 pt-5 mt-6 flex flex-wrap justify-end gap-3">
                     <button 
                       onClick={() => setSelectedJob(null)}
                       className="px-5 py-2.5 border border-dark-700 text-slate-650 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all"
@@ -492,36 +492,34 @@ export default function Jobs() {
                       Close Brief
                     </button>
                     
-                    {selectedJob.match_percentage >= 70 ? (
-                      <button 
-                        onClick={() => handleApply(selectedJob.id)}
-                        className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
-                          appliedJobs.includes(selectedJob.id)
-                            ? 'bg-emerald-600 text-white cursor-default' 
-                            : 'bg-[#166534] hover:bg-[#0f4c28] text-white hover:-translate-y-0.5'
-                        }`}
-                      >
-                        {appliedJobs.includes(selectedJob.id) ? (
-                          <>
-                            <span>Applied Successfully</span>
-                            <span>✓</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Submit Application via PFJ</span>
-                            
-                          </>
-                        )}
-                      </button>
-                    ) : (
+                    {selectedJob.match_percentage < 70 && (
                       <a 
                         href="/skills"
                         className="px-6 py-2.5 bg-gradient-to-r from-neon-purple to-neon-pink hover:-translate-y-0.5 text-white rounded-xl text-xs font-bold transition-all shadow-md text-center flex items-center gap-1.5"
                       >
                         <span>Learn Missing Skills</span>
-                        
                       </a>
                     )}
+
+                    <button 
+                      onClick={() => handleApply(selectedJob.id)}
+                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+                        appliedJobs.includes(selectedJob.id)
+                          ? 'bg-emerald-600 text-white cursor-default' 
+                          : 'bg-[#166534] hover:bg-[#0f4c28] text-white hover:-translate-y-0.5'
+                      }`}
+                    >
+                      {appliedJobs.includes(selectedJob.id) ? (
+                        <>
+                          <span>Applied Successfully</span>
+                          <span>✓</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Submit Application via PATH</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </motion.div>
 
