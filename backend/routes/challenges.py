@@ -3,6 +3,7 @@ from database.firebase_db import get_firestore
 from utils.jwt_handler import verify_token
 from middleware.security import limiter
 from ml.coding_challenges import get_challenges_for_role, get_challenge_by_id, generate_dynamic_challenge
+from services.user_service import get_target_role
 from google.cloud import firestore
 
 router = APIRouter(prefix="/api/challenges", tags=["Coding Challenges"])
@@ -12,11 +13,8 @@ def get_challenges(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
-    profile_doc = db.collection("users").document(uid).get()
-    role = "Software Engineer"
-    if profile_doc.exists:
-        role = profile_doc.to_dict().get("target_role", "Software Engineer")
-    
+    role = get_target_role(db, uid)
+
     # We strip out the test cases and initial code so we just return the catalog
     challenges = get_challenges_for_role(role)
     catalog = [
@@ -38,11 +36,8 @@ def generate_challenge(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
-    profile_doc = db.collection("users").document(uid).get()
-    role = "Software Engineer"
-    if profile_doc.exists:
-        role = profile_doc.to_dict().get("target_role", "Software Engineer")
-    
+    role = get_target_role(db, uid)
+
     challenge = generate_dynamic_challenge(role)
     if not challenge:
         raise HTTPException(status_code=500, detail="Failed to generate dynamic challenge")

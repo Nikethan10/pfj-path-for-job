@@ -10,9 +10,24 @@ const API = axios.create({
   timeout: 30000, // 30 seconds timeout to handle cold starts but prevent infinite hang
 });
 
-// Attach the stored Firebase ID token to every request.
-API.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('PATH_token');
+// Attach a Firebase ID token to every request. Ask the SDK first — it caches the
+// token and silently refreshes it when it's about to expire, so requests almost
+// never go out with a stale token. localStorage is only the fallback for the
+// brief window before Firebase restores the session on page load.
+API.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  let token: string | null = null;
+  const current = auth.currentUser;
+  if (current) {
+    try {
+      token = await current.getIdToken();
+      localStorage.setItem('PATH_token', token);
+    } catch {
+      token = null;
+    }
+  }
+  if (!token) {
+    token = localStorage.getItem('PATH_token');
+  }
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

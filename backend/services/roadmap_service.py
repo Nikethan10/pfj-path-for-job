@@ -1,15 +1,17 @@
 from fastapi import HTTPException
 from ml.skill_gap import analyze_skill_gap
 from ml.roadmap_generator import generate_roadmap
+from services.user_service import get_user_profile
 
 def generate_user_roadmap(db, uid: str, target_role: str = None) -> dict:
-    profile_ref = db.collection("users").document(uid).get()
-    profile = profile_ref.to_dict() if profile_ref.exists else {}
-    
-    if not profile and not target_role:
-        raise HTTPException(status_code=400, detail="Create a profile or specify a target role")
+    profile = get_user_profile(db, uid)
 
     role = target_role or profile.get("target_role")
+    if not role:
+        raise HTTPException(
+            status_code=400,
+            detail="Set a target role in your profile (or pass one) before generating a roadmap.",
+        )
     weekly_hours = profile.get("weekly_hours", 10)
 
     # Get user's current skills
@@ -35,13 +37,14 @@ def generate_user_roadmap(db, uid: str, target_role: str = None) -> dict:
         career_skills_map = s_data.get("career_skills", {})
         roles_list = s_data.get("roles", [])
         
+        # importance_score is a 0-1 fraction ("required in N% of job listings").
         importance = None
         if role in career_skills_map:
-            importance = career_skills_map[role].get("importance_score", 5)
+            importance = career_skills_map[role].get("importance_score", 0.5)
         elif role in roles_list:
-            importance = 5
+            importance = 0.5
         elif s_data.get("role") == role:
-            importance = 5
+            importance = 0.5
             
         if importance is not None:
             career_skills.append({
@@ -56,9 +59,10 @@ def generate_user_roadmap(db, uid: str, target_role: str = None) -> dict:
 
     missing = analyze_skill_gap(role, user_skill_names, career_skills)
 
+    # difficulty_weight is a multiplier around 1.0 (0.5 easy … 2.0 hard).
     skill_metadata = {}
     for s_name, s_data in all_skills.items():
-        skill_metadata[s_name] = s_data.get("difficulty_weight", 5)
+        skill_metadata[s_name] = s_data.get("difficulty_weight", 1.0)
 
     roadmap_items = generate_roadmap(missing, weekly_hours, skill_metadata)
 
@@ -94,8 +98,7 @@ def generate_user_roadmap(db, uid: str, target_role: str = None) -> dict:
 
 
 def get_user_roadmap(db, uid: str) -> dict:
-    profile_ref = db.collection("users").document(uid).get()
-    profile = profile_ref.to_dict() if profile_ref.exists else {}
+    profile = get_user_profile(db, uid)
     target_role = profile.get("target_role", "Not set")
 
     roadmaps_ref = db.collection("users").document(uid).collection("roadmaps")

@@ -10,6 +10,8 @@ import json
 import os
 from datetime import datetime, timezone
 
+from services.activity_service import activity_type, timestamp_to_date
+
 _BADGES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "badges.json")
 
 
@@ -38,10 +40,10 @@ def compute_metrics(db, uid: str) -> dict:
     interview_answers = 0
     challenge_activity = 0
     for a in activities:
-        ts = a.get("timestamp", "")
-        if ts:
-            active_days.add(ts.split("T")[0])
-        atype = a.get("type")
+        day = timestamp_to_date(a.get("timestamp"))
+        if day:
+            active_days.add(day)
+        atype = activity_type(a)
         if atype == "resume_analysis":
             resume_analyses += 1
         elif atype == "complete_roadmap_item":

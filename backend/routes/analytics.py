@@ -98,14 +98,16 @@ def get_activity(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
+    from services.activity_service import timestamp_to_date
+
     activities = db.collection("users").document(uid).collection("activity").order_by(
         "timestamp", direction="DESCENDING"
-    ).limit(30).get()
-    
+    ).limit(200).get()
+
     heatmap = {}
     for act in activities:
-        date_str = act.to_dict().get("timestamp", "").split("T")[0]
+        date_str = timestamp_to_date(act.to_dict().get("timestamp"))
         if date_str:
             heatmap[date_str] = heatmap.get(date_str, 0) + 1
-            
+
     return heatmap

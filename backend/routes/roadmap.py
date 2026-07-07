@@ -4,6 +4,7 @@ from utils.jwt_handler import verify_token
 from schemas.roadmap import RoadmapGenerate, RoadmapStatusUpdate
 from services.roadmap_service import generate_user_roadmap, get_user_roadmap, update_roadmap_status
 from pydantic import BaseModel
+import math
 import secrets
 from datetime import datetime, timezone
 
@@ -95,7 +96,9 @@ def submit_quiz(
         raise HTTPException(status_code=400, detail="Invalid quiz submission")
 
     score = sum(1 for u, c in zip(data.user_answers, correct_indices) if u == c)
-    passed = score >= 2  # Pass if >= 2 of 3 correct
+    # Pass at ~two-thirds correct, scaled to however many questions were served
+    # (the AI fallback can return fewer than 3).
+    passed = score >= max(1, math.ceil(len(correct_indices) * 2 / 3))
 
     # One-time use: consume the session regardless of outcome.
     session_ref.delete()

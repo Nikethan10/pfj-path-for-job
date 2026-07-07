@@ -3,10 +3,11 @@ import re
 import logging
 import pypdf
 import docx
-from datetime import datetime
+from datetime import datetime, timezone
 
 from services.ai_service import analyze_project_complexity, analyze_linkedin_profile, match_job_description
 from services.github_service import analyze_github_profile
+from services.user_service import get_user_profile, DEFAULT_TARGET_ROLE
 
 logger = logging.getLogger(__name__)
 
@@ -149,17 +150,9 @@ def parse_resume_text(text: str, all_skills_list: list) -> dict:
                     
     if current_exp:
         exp_list.append(current_exp)
-        
-    if not exp_list:
-        exp_list = [{
-            "role": "Software Developer Intern",
-            "company": "Innovation Labs",
-            "duration": "June 2024 - Dec 2024",
-            "highlights": [
-                "Contributed to building backend microservices using Python and Flask.",
-                "Optimized database queries, speeding up dashboard render rates by 15%."
-            ]
-        }]
+
+    # If nothing was found, report nothing — never invent experience the
+    # candidate doesn't have; the ATS audit flags the gap instead.
         
     # 3. Parse Projects
     proj_list = []
@@ -192,31 +185,14 @@ def parse_resume_text(text: str, all_skills_list: list) -> dict:
             for s in all_skills_list[:30]:
                 if re.search(r"\b" + re.escape(s.lower()) + r"\b", desc_lower):
                     found_techs.append(s)
-            proj["technologies"] = ", ".join(found_techs) if found_techs else "React, NodeJS"
-            
-    if not proj_list:
-        proj_list = [
-            {
-                "title": "E-Commerce Microservices",
-                "description": "Designed a scalable API Gateway and modular microservice infrastructure to handle real-time orders.",
-                "technologies": "FastAPI, PostgreSQL, Docker, Redis"
-            },
-            {
-                "title": "AI Image Classification",
-                "description": "Built a deep learning model that automatically categorizes images into subsets, using PyTorch.",
-                "technologies": "Python, PyTorch, NumPy"
-            }
-        ]
-        
-    # 4. Parse Certifications
+            proj["technologies"] = ", ".join(found_techs)
+
+    # 4. Parse Certifications — only what's actually in the resume.
     certs = []
     cert_lines = sections.get("certifications", [])
     for line in cert_lines:
         if len(line) > 5 and len(line) < 80:
             certs.append(line.lstrip("-*• ").strip())
-            
-    if not certs:
-        certs = ["AWS Certified Cloud Practitioner", "Google Advanced Data Analytics"]
         
     return {
         "name": name,
@@ -255,9 +231,8 @@ def analyze_user_resume(
     extracted = parse_resume_text(resume_text, all_skill_names)
     
     # Find user profile details
-    profile_doc = db.collection("users").document(uid).get()
-    profile = profile_doc.to_dict() if profile_doc.exists else {}
-    target_role = profile.get("target_role", "Software Engineer")
+    profile = get_user_profile(db, uid)
+    target_role = profile.get("target_role") or DEFAULT_TARGET_ROLE
     
     # 3. Compile GitHub Analysis
     github_name = github_user
@@ -291,20 +266,24 @@ def analyze_user_resume(
     if linkedin_data:
         linkedin_score = linkedin_data.get("linkedin_score")
     
-    # 5. Project Analyzer
+    # 5. Project Analyzer — each analysis is an LLM call, so run them concurrently
+    # instead of serially (3 projects at ~10s each would otherwise take ~30s alone).
     project_results = []
-    portfolio_strength_sum = 0
-    
-    for proj in extracted["projects"]:
-        title = proj["title"]
-        desc = proj["description"]
-        techs = proj["technologies"]
-        res = analyze_project_complexity(title, desc, techs)
-        res["title"] = title
-        project_results.append(res)
-        portfolio_strength_sum += res.get("overall_score", 50.0)
-        
-    portfolio_strength = round(portfolio_strength_sum / len(project_results), 1) if project_results else 50.0
+    projects_to_analyze = extracted["projects"]
+    if projects_to_analyze:
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _analyze(proj):
+            res = analyze_project_complexity(proj["title"], proj["description"], proj["technologies"])
+            res["title"] = proj["title"]
+            return res
+
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            project_results = list(pool.map(_analyze, projects_to_analyze))
+
+    portfolio_strength_sum = sum(r.get("overall_score", 50.0) for r in project_results)
+    # No projects found = no portfolio credit (previously a free 50 points).
+    portfolio_strength = round(portfolio_strength_sum / len(project_results), 1) if project_results else 0.0
     
     # 6. ATS Audit
     word_count = len(resume_text.split())
@@ -333,6 +312,10 @@ def analyze_user_resume(
         issues.append("Skill coverage is limited. Add primary programming languages, libraries, and developer tools.")
     if not has_exp:
         issues.append("No structured work experience highlights detected. Write about internship or leadership achievements.")
+    if not has_proj:
+        issues.append("No projects section detected. Add 2-3 projects with clear descriptions and the technologies used.")
+    if not extracted["certifications"]:
+        issues.append("No certifications found. Relevant certifications (cloud, data, security) strengthen entry-level resumes.")
         
     checklist_passed = sum(1 for v in structure_checks.values() if v)
     formatting_score = 60.0 + (checklist_passed * 8.0)
@@ -527,7 +510,7 @@ def analyze_user_resume(
         "benchmarking": benchmarking,
         "internship_readiness": internship_prob,
         "salary_estimation": salary_est,
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     doc_ref = db.collection("users").document(uid).collection("resumes").document()
@@ -580,7 +563,7 @@ def save_job_match(db, uid: str, job_description: str, match_result: dict) -> di
         "match_score": match_result.get("match_score", 0),
         "skill_breakdown": match_result.get("skill_breakdown", {}),
         "recommendations": match_result.get("recommendations", []),
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     doc_ref = db.collection("users").document(uid).collection("job_matches").document()

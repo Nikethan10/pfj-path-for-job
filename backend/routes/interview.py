@@ -4,6 +4,7 @@ from utils.jwt_handler import verify_token
 from middleware.security import limiter
 from schemas.interview import EvaluationRequest, QuestionRequest
 from ml.interview_simulator import generate_interview_question, evaluate_interview_answer
+from services.user_service import get_target_role
 from google.cloud import firestore
 
 router = APIRouter(prefix="/api/interview", tags=["Interview Simulator"])
@@ -17,11 +18,8 @@ def get_question(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
-    profile_doc = db.collection("users").document(uid).get()
-    target_role = "Software Engineer"
-    if profile_doc.exists:
-        target_role = profile_doc.to_dict().get("target_role", "Software Engineer")
-    
+    target_role = get_target_role(db, uid)
+
     # Pass previous_questions and interview_type to generate custom questions
     return generate_interview_question(target_role, data.previous_questions, data.interview_type)
 

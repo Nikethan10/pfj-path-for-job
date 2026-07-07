@@ -30,26 +30,26 @@ def analyze_github_profile(username: str) -> dict:
     """
     Crawls public GitHub API for user repositories, languages, commit velocities, and stars.
     Computes github_score and returns structured strengths/weaknesses.
-    Fails over to a beautiful mockup response if rate limited or not found.
+    Returns None when the profile can't be fetched (unknown user, rate limit, network) —
+    the caller/UI shows an honest "unavailable" state instead of invented data.
     """
     if not username:
-        return get_mock_github_response("candidate")
-        
+        return None
+
     # Clean username if it is a full URL
     username = username.strip().split("/")[-1]
-    
+
     # 1. Try to fetch user info
     user_url = f"https://api.github.com/users/{username}"
     user_data = make_github_request(user_url)
-    
+
     # 2. Try to fetch repositories
     repos_url = f"https://api.github.com/users/{username}/repos?per_page=60&sort=updated"
     repos_data = make_github_request(repos_url)
-    
+
     if not user_data or repos_data is None:
-        # Fallback to realistic mock if API fails or rate-limited
-        logger.warning(f"Failed to fetch GitHub API data for {username}. Using mock fallback.")
-        return get_mock_github_response(username)
+        logger.warning(f"Failed to fetch GitHub API data for {username}.")
+        return None
         
     # Process actual API data
     public_repos = user_data.get("public_repos", 0)
@@ -180,88 +180,6 @@ def analyze_github_profile(username: str) -> dict:
         "velocity": velocity_desc,
         "languages": lang_distribution,
         "top_repositories": repos_list[:4],
-        "strengths": strengths,
-        "weaknesses": weaknesses,
-        "recommendations": recommendations
-    }
-
-
-def get_mock_github_response(username: str) -> dict:
-    """Generates a highly realistic, responsive mock GitHub analysis payload."""
-    clean_name = username.strip().split("/")[-1]
-    
-    # Pick a random-looking but stable score based on username characters
-    hash_val = sum(ord(c) for c in clean_name)
-    github_score = round(65.0 + (hash_val % 25), 1)
-    repos_count = 8 + (hash_val % 10)
-    followers = 4 + (hash_val % 20)
-    stars = hash_val % 12
-    forks = hash_val % 5
-    
-    languages = {"Python": 5, "JavaScript": 4, "TypeScript": 2, "HTML": 1}
-    if hash_val % 2 == 0:
-        languages = {"JavaScript": 6, "TypeScript": 4, "CSS": 2, "Go": 1}
-        
-    top_repos = [
-        {
-            "name": "portfolio-website",
-            "description": "Personal developer portfolio designed with modern responsive UI principles.",
-            "stars": int(stars * 0.5),
-            "forks": int(forks * 0.2),
-            "language": list(languages.keys())[0],
-            "url": f"https://github.com/{clean_name}/portfolio-website",
-            "updated_at": (datetime.utcnow() - timedelta(days=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        },
-        {
-            "name": "api-gateway-service",
-            "description": "Lightweight API Gateway implementation for routing and basic auth.",
-            "stars": int(stars * 0.3),
-            "forks": int(forks * 0.5),
-            "language": "Python" if "Python" in languages else "TypeScript",
-            "url": f"https://github.com/{clean_name}/api-gateway-service",
-            "updated_at": (datetime.utcnow() - timedelta(days=20)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        },
-        {
-            "name": "custom-react-hooks",
-            "description": "A collection of reusable custom React hooks for standard layout interactions.",
-            "stars": int(stars * 0.2),
-            "forks": 0,
-            "language": "JavaScript" if "JavaScript" in languages else "TypeScript",
-            "url": f"https://github.com/{clean_name}/custom-react-hooks",
-            "updated_at": (datetime.utcnow() - timedelta(days=65)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        }
-    ]
-    
-    strengths = [
-        f"Healthy project codebase count ({repos_count} repositories detected).",
-        f"Shows multi-language capability involving {list(languages.keys())[0]} and {list(languages.keys())[1]}.",
-        "Good directory structuring in top-pinned repositories."
-    ]
-    
-    weaknesses = [
-        "Low commit density over the past 30 days.",
-        "Missing detailed README instructions on how to install and run project environments.",
-        "Few community stargazers or external contributions."
-    ]
-    
-    recommendations = [
-        "Create a comprehensive README.md for every repository with clear setup commands and screenshots.",
-        "Create a structured Github profile README displaying stats, tech logos, and interests.",
-        "Increase commit frequency to demonstrate engineering consistency and active contributions."
-    ]
-    
-    return {
-        "username": clean_name,
-        "name": clean_name.title(),
-        "avatar_url": f"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150",
-        "github_score": github_score,
-        "public_repos": repos_count,
-        "followers": followers,
-        "stars": stars,
-        "forks": forks,
-        "velocity": "Moderate Activity (Recent updates in the last 90 days)",
-        "languages": languages,
-        "top_repositories": top_repos,
         "strengths": strengths,
         "weaknesses": weaknesses,
         "recommendations": recommendations

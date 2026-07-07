@@ -3,25 +3,16 @@ from database.firebase_db import get_firestore
 from utils.jwt_handler import verify_token
 from middleware.security import limiter
 from services.ai_service import run_ai_prompt, clean_json_response
+from services.activity_service import log_activity
+from utils.slugs import skill_doc_id
 from pydantic import BaseModel, Field
 import json
 import re
-from datetime import datetime
 
 router = APIRouter(prefix="/api/assistant", tags=["AI Assistant"])
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
-
-def log_activity(db, uid: str, action_type: str, details: dict = None):
-    doc_ref = db.collection("users").document(uid).collection("activity").document()
-    data = {
-        "type": action_type,
-        "timestamp": datetime.utcnow().isoformat()
-    }
-    if details:
-        data.update(details)
-    doc_ref.set(data)
 
 @router.post("/chat")
 @limiter.limit("20/minute")
@@ -140,13 +131,18 @@ def chat_with_assistant(
                 "intent": "skills"
             }
             
-        new_ss_ref = db.collection("users").document(uid).collection("skills").document()
+        # Key the document the same way the Skills API does so it can be
+        # updated/removed from the Skills page later.
+        doc_id = skill_doc_id(skill_name)
+        new_ss_ref = db.collection("users").document(uid).collection("skills").document(doc_id)
         new_ss_ref.set({
+            "skill_id": doc_id.lower().replace(" ", "-"),
             "skill_name": skill_name,
+            "category": "Custom",
             "level": "Beginner",
             "progress_percent": 10
         })
-        log_activity(db, uid, "add_skill", {"skill_id": new_ss_ref.id, "skill_name": skill_name})
+        log_activity(db, uid, "add_skill", {"skill_id": doc_id, "skill_name": skill_name})
         return {
             "response": f"✅ Core Skill added! I've linked **{skill_name}** to your skills catalog. Check the roadmap for next branches.",
             "intent": "add_skill",
@@ -157,13 +153,16 @@ def chat_with_assistant(
     is_remove = any(p in user_message_lower for p in ["remove skill", "delete skill", "remove ", "delete "])
     if is_remove:
         cleaned_msg = user_message_lower.replace("remove skill", "").replace("delete skill", "").replace("from my skills", "").replace("from skills", "").replace("remove", "").replace("delete", "").strip()
-        
+
+        # Only act on an explicit, non-empty skill name — an empty string would
+        # substring-match (and delete) the user's first skill.
         matched_doc = None
-        for doc in skills_docs:
-            if cleaned_msg in doc.to_dict().get("skill_name", "").lower():
-                matched_doc = doc
-                break
-                
+        if cleaned_msg:
+            for doc in skills_docs:
+                if cleaned_msg in doc.to_dict().get("skill_name", "").lower():
+                    matched_doc = doc
+                    break
+
         if matched_doc:
             db.collection("users").document(uid).collection("skills").document(matched_doc.id).delete()
             log_activity(db, uid, "delete_skill", {"skill_id": matched_doc.id})
@@ -185,10 +184,10 @@ def chat_with_assistant(
             "intent": "faq_projects"
         }
 
-    # Career Trajectory: Data Scientist from Scratch
+    # Career Trajectory: Data Scientist from Scratch.
+    # Guidance only — never silently rewrite the user's target role; they can change
+    # it themselves in Settings or by regenerating the roadmap with a new role.
     if "data scientist" in user_message_lower or "data science" in user_message_lower:
-        if target_role != "Data Scientist":
-            db.collection("users").document(uid).collection("profile").document("main").set({"target_role": "Data Scientist"}, merge=True)
         return {
             "response": "📊 **Starting Data Science from Scratch (Roadmap)**:\n\n"
                         "To enter data science, you must master programming, data structures, statistics, and modeling frameworks. Here are the core stages:\n\n"
@@ -198,9 +197,8 @@ def chat_with_assistant(
                         "4. **Descriptive & Inferential Statistics**: Understand probability, distributions, hypothesis testing, and regressions.\n"
                         "5. **Machine Learning**: Learn to train classifiers, clusters, and regression models using **Scikit-Learn**.\n"
                         "6. **Visual Analysis**: Learn to build visual dashboards (using Tableau, PowerBI, or Chart.js).\n\n"
-                        "🎯 I have updated your target path to **Data Scientist**! Check your **[Roadmap Milestones](/roadmap)** to view specific skill branches.",
-            "intent": "career_guidance",
-            "action": {"type": "refresh_data", "route": "profile"}
+                        "🎯 Want to pursue this path? Update your target role to **Data Scientist** in your profile settings, then check your **[Roadmap Milestones](/roadmap)**.",
+            "intent": "career_guidance"
         }
 
     # Aligned project suggesting trigger

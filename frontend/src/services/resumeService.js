@@ -16,6 +16,8 @@ export const analyzeResume = (resumeInput, githubUser = '', linkedinText = '') =
   
   return API.post('/resume/analyze', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    // The full audit runs several AI calls; give it more room than the 30s default.
+    timeout: 120000,
   });
 };
 

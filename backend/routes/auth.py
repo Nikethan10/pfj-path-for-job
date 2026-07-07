@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from schemas.auth import FirebaseTokenRequest, UserResponse
 from database.firebase_db import verify_token, get_firestore
 from middleware.security import limiter
-from datetime import datetime
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -28,20 +28,23 @@ def verify_firebase_token(request: Request, data: FirebaseTokenRequest):
     user_ref = db.collection("users").document(uid)
     
     user_doc = user_ref.get()
-    
+
+    now = datetime.now(timezone.utc).isoformat()
     if not user_doc.exists:
         # Create new user in Firestore
         user_ref.set({
             "uid": uid,
             "email": email,
             "name": name,
-            "created_at": datetime.utcnow().isoformat(),
-            "last_login": datetime.utcnow().isoformat()
+            "created_at": now,
+            "last_login": now
         })
     else:
+        if (user_doc.to_dict() or {}).get("banned"):
+            raise HTTPException(status_code=403, detail="This account has been suspended.")
         # Update last login
         user_ref.update({
-            "last_login": datetime.utcnow().isoformat()
+            "last_login": now
         })
         
     return UserResponse(

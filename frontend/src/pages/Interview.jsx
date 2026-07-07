@@ -22,7 +22,6 @@ export default function Interview() {
   const [totalScore, setTotalScore] = useState(0);
   const [questionCount, setQuestionCount] = useState(0);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
-  const [timerInterval, setTimerInterval] = useState(null);
   const [profile, setProfile] = useState(null);
 
   const messagesEndRef = useRef(null);

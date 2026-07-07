@@ -10,8 +10,6 @@ not trained models — chosen for explainability and zero-infra reliability.
 | `interview_simulator.py` | AI question generation + answer evaluation, with a large static question bank and a deterministic rule-based scorer as fallbacks. |
 | `job_matcher.py` | Matches user skills against a job catalog (weighted similarity). |
 | `project_recommender.py` | Recommends projects by skill/role alignment. |
-| `readiness_scorer.py` | Weighted placement-readiness score. |
-| `consistency.py` | Activity streak / consistency metrics. |
 | `skill_gap.py` | Missing-skill analysis vs a target role, ranked by importance. |
 | `roadmap_generator.py` | Builds the roadmap structure. |
 

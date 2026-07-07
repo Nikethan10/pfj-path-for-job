@@ -11,6 +11,22 @@ const PISTON_RUNTIMES = {
   python: { language: 'python', version: '3.10.0' }
 };
 
+// Free public code-execution API (no key required).
+const PISTON_URL = 'https://emkc.org/api/v2/piston/execute';
+
+// Find the function the user actually defined, so the test harness calls the right
+// thing (AI-generated challenges use `solution`, catalog ones use camelCase ids).
+const detectFunctionName = (src, lang) => {
+  if (lang === 'javascript') {
+    const m =
+      src.match(/function\s+([A-Za-z_$][\w$]*)\s*\(/) ||
+      src.match(/(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function|\()/);
+    return m ? m[1] : null;
+  }
+  const m = src.match(/def\s+([A-Za-z_]\w*)\s*\(/);
+  return m ? m[1] : null;
+};
+
 export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
   const [activeChallenge, setActiveChallenge] = useState(null);
@@ -93,6 +109,12 @@ export default function Challenges() {
     setOutput(null);
     setTestResults(null);
 
+    // Prefer the function the user actually wrote; fall back to the id-derived name.
+    const fallbackName = language === 'javascript'
+      ? activeChallenge.id.split('-').map((p, idx) => idx === 0 ? p : p.charAt(0).toUpperCase() + p.slice(1)).join('')
+      : activeChallenge.id.replace(/-/g, '_');
+    const funcName = detectFunctionName(code, language) || fallbackName;
+
     let codeToRun = code;
 
     // If running tests, append assertions
@@ -101,9 +123,7 @@ export default function Challenges() {
       if (language === 'javascript') {
         let testBlock = '\n\n// --- TEST EXECUTION ---\n';
         tests.forEach((tc, i) => {
-          // Assuming function name is derived from camelCase of id (e.g., two-sum -> twoSum)
-          const funcName = activeChallenge.id.split('-').map((p, idx) => idx === 0 ? p : p.charAt(0).toUpperCase() + p.slice(1)).join('');
-          testBlock += `try { 
+          testBlock += `try {
             const res = ${funcName}(${tc.input});
             const expected = ${tc.expected};
             if (JSON.stringify(res) === JSON.stringify(expected)) {
@@ -115,9 +135,8 @@ export default function Challenges() {
         });
         codeToRun += testBlock;
       } else if (language === 'python') {
-        let testBlock = '\n\n# --- TEST EXECUTION ---\nimport json\n';
+        let testBlock = '\n\n# --- TEST EXECUTION ---\n';
         tests.forEach((tc, i) => {
-          const funcName = activeChallenge.id.replace(/-/g, '_');
           testBlock += `try:\n    res = ${funcName}(${tc.input})\n    expected = ${tc.expected}\n    if str(res) == str(expected):\n        print("TEST ${i+1}: PASS")\n    else:\n        print(f"TEST ${i+1}: FAIL (Expected {expected} but got {res})")\nexcept Exception as e:\n    print(f"TEST ${i+1}: ERROR ({str(e)})")\n`;
         });
         codeToRun += testBlock;
@@ -125,56 +144,59 @@ export default function Challenges() {
     }
 
     try {
-      // Simulate execution locally instead of hitting the restricted Piston API
       let resultText = "";
-      
+
       if (language === 'javascript') {
+        // JavaScript runs locally in the browser — instant feedback, works offline.
         try {
-          // A very basic sandbox using new Function
           const mockLog = [];
-          const customConsole = { log: (msg) => mockLog.push(msg) };
-          const executableCode = `
-            ${codeToRun}
-          `;
-          // Create an execution context
-          const executeFn = new Function('console', executableCode);
+          const customConsole = { log: (...args) => mockLog.push(args.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ')) };
+          const executeFn = new Function('console', codeToRun);
           executeFn(customConsole);
-          
+
           if (!runTests && mockLog.length === 0) {
             resultText = "Execution finished successfully. No output.";
           } else {
-            resultText = mockLog.join("\\n");
+            resultText = mockLog.join("\n");
           }
         } catch (execErr) {
           resultText = "Error: " + execErr.message;
         }
       } else {
-        // For Python/other languages, we mock a success for demonstration since we can't run them natively
-        await new Promise(resolve => setTimeout(resolve, 800)); // simulate network delay
-        if (runTests) {
-           let mockOutput = "";
-           activeChallenge.test_cases.forEach((tc, i) => {
-             mockOutput += `TEST ${i+1}: PASS\\n`;
-           });
-           resultText = mockOutput;
-        } else {
-           resultText = "Code executed successfully! (Simulated output for non-JS languages)";
+        // Python runs for real on the free Piston execution API.
+        const pistonRes = await axios.post(PISTON_URL, {
+          language: PISTON_RUNTIMES[language].language,
+          version: PISTON_RUNTIMES[language].version,
+          files: [{ content: codeToRun }],
+        }, { timeout: 20000 });
+
+        const run = pistonRes.data?.run || {};
+        resultText = [run.stdout, run.stderr].filter(Boolean).join('\n').trim();
+        if (!resultText) {
+          resultText = run.code === 0
+            ? "Execution finished successfully. No output."
+            : "Execution failed with no output.";
         }
       }
 
       setOutput(resultText);
 
       if (runTests) {
-        const passes = (resultText.match(/PASS/g) || []).length;
+        const passes = (resultText.match(/: PASS/g) || []).length;
         const total = activeChallenge.test_cases.length;
         setTestResults({ passes, total });
-        
-        if (passes === total) {
+
+        // Only record completion for a genuine full pass.
+        if (total > 0 && passes === total) {
           markChallengeComplete(activeChallenge.id);
         }
       }
     } catch (err) {
-      setOutput('Error executing code: ' + (err.message));
+      setOutput(
+        language === 'python'
+          ? 'Error: could not reach the code execution service (Piston). Check your connection and try again.'
+          : 'Error executing code: ' + err.message
+      );
     }
     setIsRunning(false);
   };

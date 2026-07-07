@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from database.firebase_db import get_firestore
 from utils.jwt_handler import verify_token
+from utils.slugs import skill_doc_id
 from schemas.skill import SkillAdd, SkillUpdate, SkillBulkAdd
 
 router = APIRouter(prefix="/api/skills", tags=["Skills"])
@@ -60,9 +61,10 @@ def add_skill(
             "skill_name": data.skill_name,
             "category": "Custom"
         }
-        skill_id = data.skill_name.lower().replace(" ", "-")
+        skill_id = skill_doc_id(data.skill_name).lower().replace(" ", "-")
 
-    user_skill_ref = db.collection("users").document(uid).collection("skills").document(data.skill_name)
+    doc_id = skill_doc_id(data.skill_name)
+    user_skill_ref = db.collection("users").document(uid).collection("skills").document(doc_id)
     if user_skill_ref.get().exists:
         raise HTTPException(status_code=400, detail="Skill already added")
 
@@ -76,9 +78,9 @@ def add_skill(
     user_skill_ref.set(skill_data)
 
     from services.activity_service import log_activity
-    log_activity(db, uid, "add_skill", {"skill_id": data.skill_name, "skill_name": data.skill_name})
+    log_activity(db, uid, "add_skill", {"skill_id": doc_id, "skill_name": data.skill_name})
 
-    skill_data["id"] = data.skill_name
+    skill_data["id"] = doc_id
     return skill_data
 
 
@@ -106,13 +108,14 @@ def add_skills_bulk(
                 "skill_name": item.skill_name,
                 "category": "Custom"
             }
-            skill_id = item.skill_name.lower().replace(" ", "-")
-            
-        user_skill_doc = user_skills_ref.document(item.skill_name)
+            skill_id = skill_doc_id(item.skill_name).lower().replace(" ", "-")
+
+        doc_id = skill_doc_id(item.skill_name)
+        user_skill_doc = user_skills_ref.document(doc_id)
         if user_skill_doc.get().exists:
             skipped_skills.append({"skill_name": item.skill_name, "reason": "Already added"})
             continue
-            
+
         skill_data = {
             "skill_id": skill_id,
             "skill_name": skill_doc_data.get("skill_name", item.skill_name),
@@ -121,8 +124,8 @@ def add_skills_bulk(
             "progress_percent": item.progress_percent
         }
         user_skill_doc.set(skill_data)
-        
-        skill_data["id"] = item.skill_name
+
+        skill_data["id"] = doc_id
         added_skills.append(skill_data)
         
     if added_skills:
@@ -142,7 +145,7 @@ def update_skill(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
-    user_skill_ref = db.collection("users").document(uid).collection("skills").document(skill_name)
+    user_skill_ref = db.collection("users").document(uid).collection("skills").document(skill_doc_id(skill_name))
     doc = user_skill_ref.get()
     
     if not doc.exists:
@@ -169,14 +172,15 @@ def remove_skill(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
-    user_skill_ref = db.collection("users").document(uid).collection("skills").document(skill_name)
+    doc_id = skill_doc_id(skill_name)
+    user_skill_ref = db.collection("users").document(uid).collection("skills").document(doc_id)
     if not user_skill_ref.get().exists:
         raise HTTPException(status_code=404, detail="Skill not found in your profile")
-        
+
     user_skill_ref.delete()
-    
+
     from services.activity_service import log_activity
-    log_activity(db, uid, "delete_skill", {"skill_id": skill_name})
+    log_activity(db, uid, "delete_skill", {"skill_id": doc_id})
     
     return {"message": "Skill removed successfully"}
 

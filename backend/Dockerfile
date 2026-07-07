@@ -21,4 +21,6 @@ USER appuser
 EXPOSE 8000
 
 # Render (and most PaaS) inject $PORT; default to 8000 locally.
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# --proxy-headers makes uvicorn trust X-Forwarded-For from the platform's proxy so
+# rate limiting keys on the real client IP instead of the proxy's.
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]

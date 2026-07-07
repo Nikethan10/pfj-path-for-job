@@ -9,18 +9,18 @@ import Loader from '../components/Loader';
 
 // Emojis based on category for a visual pop
 const getCategoryIcon = (cat) => {
-  if (!cat) return '';
+  if (!cat) return '📚';
   const c = cat.toLowerCase();
-  if (c.includes('backend') || c.includes('api') || c.includes('server')) return '';
-  if (c.includes('frontend') || c.includes('ui') || c.includes('react')) return '';
-  if (c.includes('database') || c.includes('sql') || c.includes('mongo')) return '';
-  if (c.includes('devops') || c.includes('cloud') || c.includes('aws') || c.includes('ci/cd')) return '';
-  if (c.includes('security') || c.includes('crypto')) return '';
-  if (c.includes('data') || c.includes('analyst') || c.includes('stats')) return '';
-  if (c.includes('ml') || c.includes('deep') || c.includes('nlp') || c.includes('vision')) return '';
-  if (c.includes('hardware') || c.includes('embedded') || c.includes('circuit') || c.includes('vlsi') || c.includes('rtos')) return '';
-  if (c.includes('mechanical') || c.includes('thermo') || c.includes('cad') || c.includes('robot')) return '';
-  return '';
+  if (c.includes('backend') || c.includes('api') || c.includes('server')) return '⚙️';
+  if (c.includes('frontend') || c.includes('ui') || c.includes('react')) return '🎨';
+  if (c.includes('database') || c.includes('sql') || c.includes('mongo')) return '🗄️';
+  if (c.includes('devops') || c.includes('cloud') || c.includes('aws') || c.includes('ci/cd')) return '☁️';
+  if (c.includes('security') || c.includes('crypto')) return '🔐';
+  if (c.includes('data') || c.includes('analyst') || c.includes('stats')) return '📊';
+  if (c.includes('ml') || c.includes('deep') || c.includes('nlp') || c.includes('vision')) return '🤖';
+  if (c.includes('hardware') || c.includes('embedded') || c.includes('circuit') || c.includes('vlsi') || c.includes('rtos')) return '🔌';
+  if (c.includes('mechanical') || c.includes('thermo') || c.includes('cad') || c.includes('robot')) return '🦾';
+  return '📚';
 };
 
 // Rich local database of learning paths, syllabi, and reference links for all 53 skills
@@ -912,8 +912,10 @@ export default function Roadmap() {
   };
 
   const handleQuizSubmit = async () => {
+    // The backend may serve fewer than 3 questions (AI fallback), so validate
+    // against however many were actually returned.
     const answersList = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < quizQuestions.length; i++) {
       if (userAnswers[i] === undefined) {
         toast.error('Please answer all questions before submitting');
         return;

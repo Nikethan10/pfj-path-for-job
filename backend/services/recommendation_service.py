@@ -1,11 +1,10 @@
 from fastapi import HTTPException
 from ml.project_recommender import recommend_projects
+from services.user_service import get_target_role
 
 def get_recommended_projects(db, uid: str) -> list:
     # 1. Fetch user's profile to find their target role
-    profile_ref = db.collection("users").document(uid).get()
-    profile_data = profile_ref.to_dict() if profile_ref.exists else {}
-    target_role = profile_data.get("target_role")
+    target_role = get_target_role(db, uid, default=None)
     
     # 2. Get target role skills
     target_role_skills = set()

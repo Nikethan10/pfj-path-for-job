@@ -7,6 +7,11 @@
 *-service-account.json
 **/firebase-service-account.json
 backend/config/firebase-service-account.json
+firebase-sa.json
+render_env_vars.json
+render_services.json
+AI_HANDOVER.md
+update_render.py
 
 # ───────────────────────── Python (backend) ────────────────────────────
 __pycache__/

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import API from '../services/api';
 
 const getGreeting = () => {
@@ -130,11 +131,40 @@ export default function BotAssistant() {
                   className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div className={`p-3 rounded-2xl max-w-[85%] text-sm shadow-sm ${
-                    msg.sender === 'user' 
+                    msg.sender === 'user'
                       ? 'bg-emerald-600 text-white rounded-br-none'
                       : 'bg-slate-800 border border-slate-700 text-slate-100 rounded-bl-none'
                   }`}>
-                    {msg.text}
+                    {msg.sender === 'user' ? (
+                      msg.text
+                    ) : (
+                      // The assistant replies in markdown (bold, bullets, links) —
+                      // render it instead of showing raw asterisks.
+                      <div className="space-y-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_strong]:text-white [&_a]:text-emerald-400 [&_a]:underline">
+                        <ReactMarkdown
+                          components={{
+                            a: ({ href, children }) => (
+                              <a
+                                href={href}
+                                onClick={(e) => {
+                                  // Internal routes navigate in-app; external links open safely.
+                                  if (href && href.startsWith('/')) {
+                                    e.preventDefault();
+                                    navigate(href);
+                                  }
+                                }}
+                                target={href && href.startsWith('/') ? undefined : '_blank'}
+                                rel="noopener noreferrer"
+                              >
+                                {children}
+                              </a>
+                            ),
+                          }}
+                        >
+                          {msg.text}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </div>
                   <span className="text-[10px] text-slate-400 mt-1 mx-1">
                     {msg.sender === 'user' ? 'You' : 'Assistant'}

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 from database.firebase_db import get_firestore
 from middleware.security import limiter
 from utils.jwt_handler import verify_token
@@ -76,15 +77,18 @@ async def analyze_resume(
         raise HTTPException(status_code=400, detail="Could not extract any readable text from the provided input.")
         
     log_activity(db, uid, "resume_analysis")
-    
-    analysis_result = analyze_user_resume(
+
+    # The analysis pipeline makes several blocking AI/network calls; run it in the
+    # threadpool so it doesn't stall the event loop for every other request.
+    analysis_result = await run_in_threadpool(
+        analyze_user_resume,
         db=db,
-        user_id=uid,
+        uid=uid,
         resume_text=extracted_text,
         github_user=github_user,
-        linkedin_text=linkedin_text
+        linkedin_text=linkedin_text,
     )
-    
+
     return analysis_result
 
 
@@ -128,8 +132,14 @@ def match_resume_to_job(
             except:
                 extracted = {}
         skills = ", ".join(extracted.get("skills", []))
-        projects = " ".join([f"{p['title']}: {p['description']}" for p in extracted.get("projects", [])])
-        experience = " ".join([f"{e['role']} at {e['company']}: {', '.join(e['highlights'])}" for e in extracted.get("experience", [])])
+        projects = " ".join(
+            f"{p.get('title', '')}: {p.get('description', '')}"
+            for p in extracted.get("projects", [])
+        )
+        experience = " ".join(
+            f"{e.get('role', '')} at {e.get('company', '')}: {', '.join(e.get('highlights', []))}"
+            for e in extracted.get("experience", [])
+        )
         resume_text = f"Skills: {skills}. Projects: {projects}. Experience: {experience}"
         
     match_result = match_job_description(resume_text, request.job_description)
@@ -166,10 +176,13 @@ def audit_social_links(
     """
     github_result = {}
     linkedin_result = {}
-    
+
     if request.github_user:
-        github_result = analyze_github_profile(request.github_user)
-        
+        # analyze_github_profile returns None when the profile can't be fetched.
+        github_result = analyze_github_profile(request.github_user) or {
+            "error": "GitHub profile could not be fetched. Check the username and try again."
+        }
+
     if request.linkedin_text:
         linkedin_result = analyze_linkedin_profile(request.linkedin_text)
         
@@ -185,8 +198,9 @@ def audit_social_links(
         latest_data = latest_doc.to_dict()
         
         update_data = {}
-        if request.github_user:
-            github_score = github_result.get("github_score", latest_data.get("github_score", 0))
+        # Only fold GitHub results into the stored analysis when the fetch succeeded.
+        if request.github_user and github_result.get("github_score") is not None:
+            github_score = github_result["github_score"]
             update_data["github_score"] = github_score
             update_data["github_analysis"] = json.dumps(github_result)
             latest_data["github_score"] = github_score

@@ -91,6 +91,9 @@ def ban_user(uid: str, admin=Depends(get_admin), db=Depends(get_firestore)):
     db.collection("users").document(uid).set({"banned": True}, merge=True)
     try:
         fb_auth.update_user(uid, disabled=True)  # blocks future logins
+        # Kill existing sessions too: ID tokens live ~1h, so force a refresh
+        # (which will fail because the account is disabled).
+        fb_auth.revoke_refresh_tokens(uid)
     except Exception:
         pass
     log_audit(db, admin, "ban_user", {"uid": uid})
@@ -114,7 +117,12 @@ def delete_user(uid: str, admin=Depends(require_super_admin), db=Depends(get_fir
         fb_auth.delete_user(uid)
     except Exception:
         pass
-    db.collection("users").document(uid).delete()
+    # Firestore deletes are not recursive — remove the user's subcollections
+    # (skills, activity, resumes, ...) too, not just the top-level document.
+    try:
+        db.recursive_delete(db.collection("users").document(uid))
+    except Exception:
+        db.collection("users").document(uid).delete()
     log_audit(db, admin, "delete_user", {"uid": uid})
     return {"ok": True}
 

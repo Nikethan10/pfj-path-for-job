@@ -33,60 +33,73 @@ def clean_json_response(text: str) -> str:
 
 import random
 
-def get_gemini_client():
+# Per-call timeout (seconds). Without this a slow provider hangs the request until the
+# frontend's 30s axios timeout fires, which shows up to users as an infinite spinner.
+AI_TIMEOUT_SECONDS = 25
+GROQ_MODEL = "llama-3.3-70b-versatile"
+GEMINI_MODEL = "gemini-2.5-flash"
+
+
+def _gemini_keys() -> list:
     settings = get_settings()
     keys = [k for k in [settings.GEMINI_API_KEY, settings.GEMINI_API_KEY_2] if k]
-    if keys and HAS_GEMINI:
-        try:
-            selected_key = random.choice(keys)
-            genai.configure(api_key=selected_key)
-            return genai.GenerativeModel('gemini-2.5-flash')
-        except Exception as e:
-            logger.error(f"Failed to initialize Gemini client: {e}")
-    return None
+    random.shuffle(keys)  # spread load across both keys
+    return keys
 
-def get_groq_client():
+
+def _groq_keys() -> list:
     settings = get_settings()
     keys = [k for k in [settings.GROQ_API_KEY, settings.GROQ_API_KEY_2] if k]
-    if keys and HAS_OPENAI:
-        try:
-            selected_key = random.choice(keys)
-            return OpenAI(api_key=selected_key, base_url="https://api.groq.com/openai/v1")
-        except Exception as e:
-            logger.error(f"Failed to initialize Groq client: {e}")
-    return None
+    random.shuffle(keys)
+    return keys
+
 
 def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:
-    client = get_gemini_client()
-    if not client: return None
-    try:
-        full_prompt = prompt
-        if system_instruction:
-            full_prompt = f"{system_instruction}\n\nUser Request:\n{prompt}"
-        response = client.generate_content(full_prompt)
-        return response.text
-    except Exception as e:
-        logger.error(f"Gemini generation error: {e}")
+    if not HAS_GEMINI:
         return None
+    full_prompt = prompt
+    if system_instruction:
+        full_prompt = f"{system_instruction}\n\nUser Request:\n{prompt}"
+    # Fail over across keys: if one is rate-limited or erroring, try the other.
+    for key in _gemini_keys():
+        try:
+            genai.configure(api_key=key)
+            model = genai.GenerativeModel(GEMINI_MODEL)
+            response = model.generate_content(
+                full_prompt,
+                request_options={"timeout": AI_TIMEOUT_SECONDS},
+            )
+            return response.text
+        except Exception as e:
+            logger.warning(f"Gemini generation failed on one key, trying next: {e}")
+    return None
+
 
 def run_groq_prompt(prompt: str, system_instruction: str = None) -> str:
-    client = get_groq_client()
-    if not client: return None
-    try:
-        messages = []
-        if system_instruction:
-            messages.append({"role": "system", "content": system_instruction})
-        messages.append({"role": "user", "content": prompt})
-        
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=messages,
-            temperature=0.2
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        logger.error(f"Groq completion error: {e}")
+    if not HAS_OPENAI:
         return None
+    messages = []
+    if system_instruction:
+        messages.append({"role": "system", "content": system_instruction})
+    messages.append({"role": "user", "content": prompt})
+
+    for key in _groq_keys():
+        try:
+            client = OpenAI(
+                api_key=key,
+                base_url="https://api.groq.com/openai/v1",
+                timeout=AI_TIMEOUT_SECONDS,
+                max_retries=0,  # we do our own failover across keys/providers
+            )
+            response = client.chat.completions.create(
+                model=GROQ_MODEL,
+                messages=messages,
+                temperature=0.2
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.warning(f"Groq completion failed on one key, trying next: {e}")
+    return None
 
 
 def run_ai_prompt(prompt: str, system_instruction: str = None, prefer: str = "groq") -> str:
