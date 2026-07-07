@@ -5,6 +5,7 @@ import { verifyFirebaseToken } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import { auth, signInWithGoogle } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { authErrorMessage } from '../lib/authErrors';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -35,7 +36,7 @@ export default function Login() {
       const idToken = await userCredential.user.getIdToken(true);
       await handleBackendVerify(userCredential.user, idToken);
     } catch (err) {
-      setError(err.message || 'Login failed');
+      setError(authErrorMessage(err, 'Login failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,7 @@ export default function Login() {
       await handleBackendVerify(user, idToken);
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') {
-         setError(err.message || 'Google Sign-in failed');
+         setError(authErrorMessage(err, 'Google sign-in failed. Please try again.'));
       }
     } finally {
       setLoading(false);

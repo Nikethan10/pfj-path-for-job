@@ -23,6 +23,63 @@ const getCategoryIcon = (cat) => {
   return '📚';
 };
 
+// Curated YouTube tutorials per skill. Every video ID below was validated against
+// YouTube's oEmbed API (alive + embeddable) before shipping; titles/channels are
+// the canonical ones YouTube returned. Skills without an entry fall back to a
+// skill-specific YouTube search link, which cannot 404.
+const SKILL_VIDEOS = {
+  "Python": [{ id: "rfscVS0vtbw", title: "Learn Python - Full Course for Beginners [Tutorial]", channel: "freeCodeCamp.org" }, { id: "_uQrJ0TkZlc", title: "Python Full Course for Beginners", channel: "Programming with Mosh" }],
+  "JavaScript": [{ id: "PkZNo7MFNFg", title: "Learn JavaScript - Full Course for Beginners", channel: "freeCodeCamp.org" }, { id: "W6NZfCO5SIk", title: "JavaScript Course for Beginners – Your First Step to Web Development", channel: "Programming with Mosh" }],
+  "TypeScript": [{ id: "30LWjhZzg50", title: "Learn TypeScript – Full Tutorial", channel: "freeCodeCamp.org" }, { id: "d56mG7DezGs", title: "TypeScript Tutorial for Beginners", channel: "Programming with Mosh" }],
+  "Java": [{ id: "eIrMbAQSU34", title: "Java Full Course for Beginners", channel: "Programming with Mosh" }, { id: "xk4_1vDrzzo", title: "Java Full Course for free ☕", channel: "Bro Code" }],
+  "C++": [{ id: "vLnPwxZdW4Y", title: "C++ Tutorial for Beginners - Full Course", channel: "freeCodeCamp.org" }, { id: "8jLOx1hD3_o", title: "C++ Programming Course - Beginner to Advanced", channel: "freeCodeCamp.org" }],
+  "HTML/CSS": [{ id: "pQN-pnXPaVg", title: "HTML Full Course - Build a Website Tutorial", channel: "freeCodeCamp.org" }, { id: "OXGznpKZ_sA", title: "CSS Tutorial – Full Course for Beginners", channel: "freeCodeCamp.org" }],
+  "React": [{ id: "bMknfKXIFA8", title: "React Course - Beginner's Tutorial for React JavaScript Library [2022]", channel: "freeCodeCamp.org" }, { id: "w7ejDZ8SWv8", title: "React JS Crash Course", channel: "Traversy Media" }],
+  "Node.js": [{ id: "Oe421EPjeBE", title: "Node.js and Express.js - Full Course", channel: "freeCodeCamp.org" }, { id: "fBNz5xF-Kx4", title: "Node.js Crash Course", channel: "Traversy Media" }],
+  "Django": [{ id: "F5mRW0jo-U4", title: "Python Django Web Framework - Full Course for Beginners", channel: "freeCodeCamp.org" }, { id: "rHux0gMZ3Eg", title: "Django Tutorial for Beginners – Build Powerful Backends", channel: "Programming with Mosh" }],
+  "FastAPI": [{ id: "0sOvCWFmrtA", title: "Python API Development - Comprehensive Course for Beginners", channel: "freeCodeCamp.org" }, { id: "tLKKmouUams", title: "FastAPI Course for Beginners", channel: "freeCodeCamp.org" }],
+  "Spring Boot": [{ id: "9SGDpanrc8U", title: "Spring Boot Tutorial | Full Course [2023] [NEW]", channel: "Amigoscode" }, { id: "vtPkZShrvXQ", title: "Spring Boot Tutorial for Beginners (Java Framework)", channel: "freeCodeCamp.org" }],
+  "SQL": [{ id: "HXV3zeQKqGY", title: "SQL Tutorial - Full Database Course for Beginners", channel: "freeCodeCamp.org" }, { id: "7S_tz1z_5bA", title: "SQL Course for Beginners [Full Course]", channel: "Programming with Mosh" }],
+  "PostgreSQL": [{ id: "qw--VYLpxG4", title: "Learn PostgreSQL Tutorial - Full Course for Beginners", channel: "freeCodeCamp.org" }, { id: "SpfIwlAYaKk", title: "PostgreSQL Tutorial for Beginners", channel: "freeCodeCamp.org" }],
+  "MongoDB": [{ id: "-56x56UppqQ", title: "MongoDB Crash Course", channel: "Traversy Media" }, { id: "ofme2o29ngU", title: "MongoDB Crash Course", channel: "Web Dev Simplified" }],
+  "Docker": [{ id: "fqMOX6JJhGo", title: "Docker Tutorial for Beginners - A Full DevOps Course on How to Run Applications in Containers", channel: "freeCodeCamp.org" }],
+  "Kubernetes": [{ id: "X48VuDVv0do", title: "Kubernetes Tutorial for Beginners [FULL COURSE in 4 Hours]", channel: "TechWorld with Nana" }, { id: "d6WC5n9G_sM", title: "Kubernetes Course - Full Beginners Tutorial (Containerize Your Apps!)", channel: "freeCodeCamp.org" }],
+  "AWS": [{ id: "SOTamWNgDKc", title: "AWS Certified Cloud Practitioner Certification Course (CLF-C01) - Pass the Exam!", channel: "freeCodeCamp.org" }],
+  "CI/CD": [{ id: "scEDHsr3APg", title: "DevOps CI/CD Explained in 100 Seconds", channel: "Fireship" }, { id: "R8_veQiYBjI", title: "GitHub Actions Tutorial - Basic Concepts and CI/CD Pipeline with Docker", channel: "TechWorld with Nana" }],
+  "Git": [{ id: "RGOj5yH7evk", title: "Git and GitHub for Beginners - Crash Course", channel: "freeCodeCamp.org" }, { id: "8JJ101D3knE", title: "Git Tutorial for Beginners: Learn Git in 1 Hour", channel: "Programming with Mosh" }],
+  "Linux/Shell": [{ id: "ZtqBQ68cfJc", title: "The 50 Most Popular Linux & Terminal Commands - Full Course for Beginners", channel: "freeCodeCamp.org" }, { id: "sWbUDq4S6Y8", title: "Introduction to Linux – Full Course for Beginners", channel: "freeCodeCamp.org" }],
+  "Agile/Scrum": [{ id: "9TycLR0TqFA", title: "Introduction to Scrum - 7 Minutes", channel: "Uzility" }, { id: "SWDhGSZNF9M", title: "Scrum in 20 mins... (with examples)", channel: "Codex Community" }],
+  "Algorithms": [{ id: "8hly31xKli0", title: "Algorithms and Data Structures Tutorial - Full Course for Beginners", channel: "freeCodeCamp.org" }, { id: "KEEKn7Me-ms", title: "Algorithms: Recursion", channel: "HackerRank" }],
+  "Data Structures": [{ id: "RBSGKlAvoiM", title: "Data Structures Easy to Advanced Course - Full Tutorial from a Google Engineer", channel: "freeCodeCamp.org" }, { id: "B31LgI4Y4DQ", title: "Data Structures - Full Course Using C and C++", channel: "freeCodeCamp.org" }],
+  "System Design": [{ id: "F2FmTdLtb_4", title: "System Design Concepts Course and Interview Prep", channel: "freeCodeCamp.org" }, { id: "i7twT3x5yv8", title: "System Design Interview: A Step-By-Step Guide", channel: "ByteByteGo" }],
+  "Machine Learning": [{ id: "NWONeJKn6kc", title: "Machine Learning Course for Beginners", channel: "freeCodeCamp.org" }],
+  "Deep Learning": [{ id: "aircAruvnKk", title: "But what is a neural network? | Deep learning chapter 1", channel: "3Blue1Brown" }, { id: "VyWAvY2CF9c", title: "Deep Learning Crash Course for Beginners", channel: "freeCodeCamp.org" }],
+  "PyTorch": [{ id: "c36lUUr864M", title: "Deep Learning With PyTorch - Full Course", channel: "Patrick Loeber" }],
+  "TensorFlow": [{ id: "tPYj3fFJGjk", title: "TensorFlow 2.0 Complete Course - Python Neural Networks for Beginners Tutorial", channel: "freeCodeCamp.org" }, { id: "6_2hzRopPbQ", title: "Tensorflow Tutorial for Python in 10 Minutes", channel: "Nicholas Renotte" }],
+  "Scikit-learn": [{ id: "0B5eIE_1vpU", title: "Scikit-learn Crash Course - Machine Learning Library for Python", channel: "freeCodeCamp.org" }, { id: "pqNCD_5r0IU", title: "Scikit-Learn Course - Machine Learning in Python Tutorial", channel: "freeCodeCamp.org" }],
+  "NLP": [{ id: "dIUTsFT2MeQ", title: "Natural Language Processing with spaCy & Python - Course for Beginners", channel: "freeCodeCamp.org" }, { id: "fNxaJsNG3-s", title: "Natural Language Processing - Tokenization (NLP Zero to Hero - Part 1)", channel: "TensorFlow" }],
+  "Computer Vision": [{ id: "oXlwWbU8l2o", title: "OpenCV Course - Full Tutorial with Python", channel: "freeCodeCamp.org" }, { id: "01sAkU_NvOY", title: "Advanced Computer Vision with Python - Full Course", channel: "freeCodeCamp.org" }],
+  "NumPy": [{ id: "QUT1VHiLmmI", title: "Python NumPy Tutorial for Beginners", channel: "freeCodeCamp.org" }, { id: "GB9ByFAIAH4", title: "Complete Python NumPy Tutorial (Creating Arrays, Indexing, Math, Statistics, Reshaping)", channel: "Keith Galli" }],
+  "Pandas": [{ id: "vmEHCJofslg", title: "Complete Python Pandas Data Science Tutorial! (Reading CSV/Excel files, Sorting, Filtering, Groupby)", channel: "Keith Galli" }, { id: "ZyhVh-qRZPA", title: "Python Pandas Tutorial (Part 1): Getting Started with Data Analysis - Installation and Loading Data", channel: "Corey Schafer" }],
+  "Statistics": [{ id: "xxpc-HPKN28", title: "Statistics - A Full University Course on Data Science Basics", channel: "freeCodeCamp.org" }, { id: "kyjlxsLW1Is", title: "Teach me STATISTICS in half an hour! Seriously.", channel: "zedstatistics" }],
+  "Data Visualization": [{ id: "_8V5o2UHG0E", title: "Data Visualization with D3.js - Full Tutorial Course", channel: "freeCodeCamp.org" }, { id: "a9UrKTVEeZA", title: "Intro to Data Analysis / Visualization with Python, Matplotlib and Pandas | Matplotlib Tutorial", channel: "CS Dojo" }],
+  "Excel": [{ id: "Vl0H-qTclOg", title: "Microsoft Excel Tutorial for Beginners - Full Course", channel: "freeCodeCamp.org" }, { id: "rwbho0CgEAE", title: "The Beginner's Guide to Excel - Excel Basics Tutorial", channel: "Technology for Teachers and Students" }],
+  "Tableau": [{ id: "aHaOIvR00So", title: "Tableau Full Course - Learn Tableau in 6 Hours | Tableau Training for Beginners | Edureka", channel: "edureka!" }],
+  "Power BI": [{ id: "AGrl-H87pRU", title: "Power BI Tutorial From Beginner to Pro ⚡ Desktop to Dashboard in 60 Minutes ⏰", channel: "Avi Singh - PowerBIPro" }, { id: "77jIzgvCIYY", title: "Hands-On Power BI Tutorial 📊 Beginner to Pro [Full Course] 2023 Edition⚡", channel: "Pragmatic Works" }],
+  "R": [{ id: "_V8eKsto3Ug", title: "R Programming Tutorial - Learn the Basics of Statistical Computing", channel: "freeCodeCamp.org" }, { id: "KlsYCECWEWE", title: "R Tutorial For Beginners 2026 | R Programming Full Course In 7 Hours | R Tutorial | Simplilearn", channel: "Simplilearn" }],
+  "Linear Algebra": [{ id: "fNk_zzaMoSs", title: "Vectors | Chapter 1, Essence of linear algebra", channel: "3Blue1Brown" }, { id: "JnTa9XtvmfI", title: "Linear Algebra - Full College Course", channel: "freeCodeCamp.org" }],
+  "Network Security": [{ id: "qiQR5rTSshw", title: "Computer Networking Course - Network Engineering [CompTIA Network+ Exam Prep]", channel: "freeCodeCamp.org" }, { id: "3QhU9jd03a0", title: "Computer Networks: Crash Course Computer Science #28", channel: "CrashCourse" }],
+  "Penetration Testing": [{ id: "3Kq1MIfTWCE", title: "Full Ethical Hacking Course - Network Penetration Testing for Beginners (2019)", channel: "freeCodeCamp.org" }, { id: "fNzpcB7ODxQ", title: "Ethical Hacking in 12 Hours - Full Course - Learn to Hack!", channel: "The Cyber Mentor" }],
+  "Cryptography": [{ id: "2aHkqB2-46k", title: "Lecture 1: Introduction to Cryptography by Christof Paar", channel: "Introduction to Cryptography by Christof Paar" }, { id: "jhXCTbFnK8o", title: "Cryptography: Crash Course Computer Science #33", channel: "CrashCourse" }],
+  "Microcontrollers (Arduino/ARM)": [{ id: "fJWR7dBuc18", title: "Arduino Tutorial 1: Setting Up and Programming the Arduino for Absolute Beginners", channel: "Paul McWhorter" }, { id: "zJ-LqeX_fLU", title: "Arduino Course for Beginners - Open-Source Electronics Platform", channel: "freeCodeCamp.org" }],
+  "RTOS": [{ id: "F321087yYy4", title: "Introduction to RTOS Part 1 - What is a Real-Time Operating System (RTOS)? | Digi-Key Electronics", channel: "DigiKey" }],
+  "VLSI & Verilog": [{ id: "INEtYZqtjTo", title: "Understanding Logic Gates", channel: "Spanning Tree" }],
+  "Circuit Design": [{ id: "uXr4lXYjXuU", title: "Basic Electronics For Beginners", channel: "The Organic Chemistry Tutor" }],
+  "Thermodynamics": [{ id: "4i1MUWJoI0U", title: "Thermodynamics: Crash Course Physics #23", channel: "CrashCourse" }, { id: "8N1BxHgsoOw", title: "The Laws of Thermodynamics, Entropy, and Gibbs Free Energy", channel: "Professor Dave Explains" }],
+  "Robotics & ROS": [{ id: "wfDJAYTMTdk", title: "ROS Tutorial (ROS1) - ROS Noetic 2H30 [Crash Course]", channel: "Robotics Back-End" }, { id: "8QfI5a7lTKU", title: "What is ROS, When to use it, and Why ? - Robot Operating System Tutorial", channel: "Le Hao Nhi" }],
+  "Matlab": [{ id: "T_ekAD7U-wU", title: "The Complete MATLAB Course: Beginner to Advanced!", channel: "Joseph Delgadillo" }, { id: "7f50sQYjNRA", title: "MATLAB Crash Course for Beginners", channel: "freeCodeCamp.org" }],
+};
+
 // Rich local database of learning paths, syllabi, and reference links for all 53 skills
 const getSkillDetails = (skillName, category) => {
   const db = {
@@ -165,7 +222,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "Storytelling with Data (Cole Nussbaumer Knaflic Book Resources)", url: "https://www.storytellingwithdata.com/books", type: "doc" },
-        { name: "Data Visualization & Dashboard Design (freeCodeCamp)", url: "https://www.youtube.com/watch?v=2K2Q8A3vMoc", type: "video" },
+        { name: "Data Visualization with D3.js - Full Course (freeCodeCamp)", url: "https://www.youtube.com/watch?v=_8V5o2UHG0E", type: "video" },
         { name: "D3.js Graph Gallery Guides", url: "https://d3-graph-gallery.com/", type: "guide" }
       ]
     },
@@ -204,7 +261,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "Docker Official Docs", url: "https://docs.docker.com", type: "doc" },
-        { name: "Docker for Beginners (TechWorld with Nana)", url: "https://www.youtube.com/watch?v=3c-iKn5qK70", type: "video" },
+        { name: "Docker Full DevOps Course (freeCodeCamp)", url: "https://www.youtube.com/watch?v=fqMOX6JJhGo", type: "video" },
         { name: "Interactive Docker Tutorial (Play with Docker)", url: "https://labs.play-with-docker.com/", type: "guide" }
       ]
     },
@@ -229,7 +286,7 @@ const getSkillDetails = (skillName, category) => {
         "Week 4: VBA basics, macros, and basic data automation operations"
       ],
       resources: [
-        { name: "Excel Formulas & Functions (Kevin Stratvert Course)", url: "https://www.youtube.com/watch?v=04854Xq1Z9w", type: "video" },
+        { name: "Excel Tutorial for Beginners - Full Course (freeCodeCamp)", url: "https://www.youtube.com/watch?v=Vl0H-qTclOg", type: "video" },
         { name: "Microsoft Support Excel Functions Manual", url: "https://support.microsoft.com/en-us/excel", type: "doc" },
         { name: "Chandoo Excel Resources & Training", url: "https://chandoo.org/", type: "guide" }
       ]
@@ -269,7 +326,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "MDN Web Docs - HTML & CSS Guide", url: "https://developer.mozilla.org/en-US/docs/Web/HTML", type: "doc" },
-        { name: "CSS Flexbox & Grid Course (Kevin Powell Playlist)", url: "https://www.youtube.com/playlist?list=PL4-IK0AVhM41-Ezm5tmESVchNEi7aZU", type: "video" },
+        { name: "CSS Tutorial - Full Course for Beginners (freeCodeCamp)", url: "https://www.youtube.com/watch?v=OXGznpKZ_sA", type: "video" },
         { name: "Learn CSS Interactive Course (web.dev)", url: "https://web.dev/learn/css/", type: "guide" }
       ]
     },
@@ -334,7 +391,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "The Linux Command Line (William Shotts Textbook PDF)", url: "https://linuxcommand.org/tlcl.php", type: "doc" },
-        { name: "Linux Bash Scripting Tutorial (The Linux Experiment)", url: "https://www.youtube.com/watch?v=s3ii48qY3sc", type: "video" },
+        { name: "Introduction to Linux - Full Course (freeCodeCamp)", url: "https://www.youtube.com/watch?v=sWbUDq4S6Y8", type: "video" },
         { name: "GNU Bash Reference Manual", url: "https://www.gnu.org/software/bash/manual/bash.html", type: "guide" }
       ]
     },
@@ -361,7 +418,7 @@ const getSkillDetails = (skillName, category) => {
       resources: [
         { name: "MathWorks Official Documentation & Onramp Courses", url: "https://www.mathworks.com/help/matlab/", type: "doc" },
         { name: "MATLAB for Beginners Playlist (freeCodeCamp)", url: "https://www.youtube.com/watch?v=T_ekAD7U-wU", type: "video" },
-        { name: "MATLAB tutorials for Engineering (MIT OCW)", url: "https://ocw.mit.edu/courses/res-18-002-introduction-to-matlab-fall-2008/", type: "guide" }
+        { name: "MATLAB Onramp - Free Interactive Course (MathWorks)", url: "https://matlabacademy.mathworks.com/", type: "guide" }
       ]
     },
     "Microcontrollers (Arduino/ARM)": {
@@ -386,7 +443,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "MongoDB Official Manual & Tutorial Guides", url: "https://www.mongodb.com/docs/manual/", type: "doc" },
-        { name: "MongoDB Complete Tutorial Course (freeCodeCamp)", url: "https://www.youtube.com/watch?v=ExcRb37GQTo", type: "video" },
+        { name: "MongoDB Crash Course (Traversy Media)", url: "https://www.youtube.com/watch?v=-56x56UppqQ", type: "video" },
         { name: "MongoDB University Learning Paths", url: "https://learn.mongodb.com/", type: "guide" }
       ]
     },
@@ -490,7 +547,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "Microsoft Power BI Official Docs & Guides", url: "https://learn.microsoft.com/en-us/power-bi/", type: "doc" },
-        { name: "Power BI Course for Beginners (Kevin Stratvert Tutorial)", url: "https://www.youtube.com/watch?v=T5N0Z_6m70E", type: "video" },
+        { name: "Hands-On Power BI Full Course (Pragmatic Works)", url: "https://www.youtube.com/watch?v=77jIzgvCIYY", type: "video" },
         { name: "SQLBI DAX Guide (Alberto Ferrari & Marco Russo)", url: "https://dax.guide/", type: "guide" }
       ]
     },
@@ -503,8 +560,8 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "PyTorch.org Official Documentation & Tutorials", url: "https://pytorch.org/tutorials/", type: "doc" },
-        { name: "PyTorch for Deep Learning Course (Daniel Bourke Video)", url: "https://www.youtube.com/watch?v=Z_ikD1xGBDg", type: "video" },
-        { name: "Deep Learning with PyTorch (Eli Stevens Book Reference)", url: "https://pytorch.org/deep-learning-with-pytorch", type: "guide" }
+        { name: "Deep Learning With PyTorch - Full Course (Patrick Loeber)", url: "https://www.youtube.com/watch?v=c36lUUr864M", type: "video" },
+        { name: "Deep Learning with PyTorch (Eli Stevens Book)", url: "https://www.manning.com/books/deep-learning-with-pytorch", type: "guide" }
       ]
     },
     "Python": {
@@ -529,7 +586,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "CRAN R Project Manuals", url: "https://cran.r-project.org/manuals.html", type: "doc" },
-        { name: "R Programming Tutorial (Harvard CS50 R Course)", url: "https://www.youtube.com/watch?v=P56n14o8w7c", type: "video" },
+        { name: "R Programming Tutorial - Learn the Basics (freeCodeCamp)", url: "https://www.youtube.com/watch?v=_V8eKsto3Ug", type: "video" },
         { name: "R for Data Science (Hadley Wickham Textbook Page)", url: "https://r4ds.hadley.nz/", type: "guide" }
       ]
     },
@@ -543,7 +600,7 @@ const getSkillDetails = (skillName, category) => {
       resources: [
         { name: "Microsoft REST API Design Guidelines", url: "https://github.com/microsoft/api-guidelines", type: "doc" },
         { name: "REST API Design & Best Practices (Hussein Nasser Playlist)", url: "https://www.youtube.com/playlist?list=PLQnLJOPFTMpa83T8d9bT8yCqZqB5k-f5o", type: "video" },
-        { name: "RESTful Web APIs Book Resources", url: "https://restfulwebapis.com/", type: "guide" }
+        { name: "REST API Tutorial & Best Practices (restfulapi.net)", url: "https://restfulapi.net/", type: "guide" }
       ]
     },
     "RTOS": {
@@ -593,7 +650,7 @@ const getSkillDetails = (skillName, category) => {
         "Week 4: Database design constraints, indexes, views, and transactions"
       ],
       resources: [
-        { name: "SQL Tutorial for Beginners (Mosh Course)", url: "https://www.youtube.com/watch?v=p3qvJ9hO6Cc", type: "video" },
+        { name: "SQL Course for Beginners (Programming with Mosh)", url: "https://www.youtube.com/watch?v=7S_tz1z_5bA", type: "video" },
         { name: "SQLBolt Interactive Exercises Guide", url: "https://sqlbolt.com/", type: "guide" },
         { name: "PostgreSQL Tutorial Documentation", url: "https://www.postgresql.org/docs/", type: "doc" }
       ]
@@ -659,7 +716,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "Tableau Training & Help Reference Guides", url: "https://help.tableau.com/current/pro/desktop/en-us/default.htm", type: "doc" },
-        { name: "Tableau Full Course for Beginners (Edureka Course)", url: "https://www.youtube.com/watch?v=aHaOIvR00Mc", type: "video" },
+        { name: "Tableau Full Course for Beginners (Edureka Course)", url: "https://www.youtube.com/watch?v=aHaOIvR00So", type: "video" },
         { name: "Tableau Visual Gallery Best Practices", url: "https://public.tableau.com/app/discover", type: "guide" }
       ]
     },
@@ -672,7 +729,7 @@ const getSkillDetails = (skillName, category) => {
       ],
       resources: [
         { name: "TensorFlow Core Official Guides & Tutorials", url: "https://www.tensorflow.org/tutorials", type: "doc" },
-        { name: "TensorFlow Crash Course (Daniel Bourke Video)", url: "https://www.youtube.com/watch?v=kY0vQqbP5tY", type: "video" },
+        { name: "TensorFlow 2.0 Complete Course (freeCodeCamp)", url: "https://www.youtube.com/watch?v=tPYj3fFJGjk", type: "video" },
         { name: "Hands-On ML with Scikit-Learn and TensorFlow (A. Géron Reference)", url: "https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032632/", type: "guide" }
       ]
     },
@@ -684,7 +741,7 @@ const getSkillDetails = (skillName, category) => {
         "Week 4: Refrigeration/heat pump cycles, psychrometrics, and combustion stoichiometry"
       ],
       resources: [
-        { name: "Thermodynamics Lecture Slides & Problems (MIT OCW)", url: "https://ocw.mit.edu/courses/2-51-intermediate-thermodynamics-fluid-mechanics-spring-2004/", type: "doc" },
+        { name: "Thermodynamics Lecture Slides & Problems (MIT OCW)", url: "https://ocw.mit.edu/courses/5-60-thermodynamics-kinetics-spring-2008/", type: "doc" },
         { name: "Fundamentals of Engineering Thermodynamics (Moran & Shapiro)", url: "https://www.wiley.com/en-us/Fundamentals+of+Engineering+Thermodynamics-p-9781119391388", type: "guide" },
         { name: "Thermodynamics Lecture Course (IIT Kharagpur / NPTEL Playlist)", url: "https://www.youtube.com/playlist?list=PLDBE646BA83366BCB", type: "video" }
       ]
@@ -725,7 +782,7 @@ const getSkillDetails = (skillName, category) => {
       `Week 4: Implementation testing, debugging practices, and deployment`
     ],
     resources: [
-      { name: `${skillName} Official Documentation`, url: "https://docs.google.com/search?q=" + encodeURIComponent(skillName + " documentation"), type: "doc" },
+      { name: `${skillName} Official Documentation`, url: "https://www.google.com/search?q=" + encodeURIComponent(skillName + " official documentation"), type: "doc" },
       { name: `${skillName} Beginners Tutorial`, url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(skillName + " tutorial"), type: "video" },
       { name: "Roadmap.sh Developer Guides", url: "https://roadmap.sh", type: "guide" }
     ]
@@ -883,6 +940,8 @@ export default function Roadmap() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [initialFitDone, setInitialFitDone] = useState(false);
+  // Which curated tutorial (if any) is playing inline in the inspector panel.
+  const [playingVideo, setPlayingVideo] = useState(null);
 
   // Quiz Modal State Variables
   const [quizOpen, setQuizOpen] = useState(false);
@@ -1167,6 +1226,17 @@ export default function Roadmap() {
     return getSkillDetails(selectedNode.skill_name, selectedNode.category);
   }, [selectedNode]);
 
+  // Curated, validated YouTube tutorials for the selected skill.
+  const selectedNodeVideos = useMemo(() => {
+    if (!selectedNode) return [];
+    return SKILL_VIDEOS[selectedNode.skill_name] || [];
+  }, [selectedNode]);
+
+  // Stop any playing video when the user switches roadmap nodes.
+  useEffect(() => {
+    setPlayingVideo(null);
+  }, [selectedNode?.id]);
+
   // Find recommended projects requiring this skill
   const matchingProjects = useMemo(() => {
     if (!selectedNode) return [];
@@ -1424,7 +1494,7 @@ export default function Roadmap() {
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-lg">
-                              {res.type === 'doc' ? '' : res.type === 'video' ? '' : ''}
+                              {res.type === 'doc' ? '📄' : res.type === 'video' ? '▶️' : '🧭'}
                             </span>
                             <span className="text-xs font-medium text-slate-300 group-hover:text-white">{res.name}</span>
                           </div>
@@ -1434,6 +1504,70 @@ export default function Roadmap() {
                     </div>
                   </div>
                 )}
+
+                {/* YouTube Video Tutorials — curated per skill, playable inline */}
+                <div className="mb-5">
+                  <h3 className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-3">Video Tutorials</h3>
+                  <div className="flex flex-col gap-2.5">
+                    {selectedNodeVideos.map((vid) => (
+                      playingVideo === vid.id ? (
+                        <div key={vid.id} className="rounded-2xl overflow-hidden border border-slate-800/80 bg-black">
+                          <div className="aspect-video">
+                            <iframe
+                              src={`https://www.youtube-nocookie.com/embed/${vid.id}?autoplay=1`}
+                              title={vid.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="w-full h-full"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between gap-2 px-3 py-2 bg-slate-950/60">
+                            <span className="text-[10px] text-slate-400 truncate">{vid.title}</span>
+                            <button
+                              onClick={() => setPlayingVideo(null)}
+                              className="text-[10px] font-bold text-slate-400 hover:text-white shrink-0 uppercase tracking-wider"
+                            >
+                              Close ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          key={vid.id}
+                          onClick={() => setPlayingVideo(vid.id)}
+                          className="flex items-center gap-3 p-2.5 bg-slate-950/40 border border-slate-800/80 hover:border-rose-500/40 hover:bg-rose-500/5 rounded-2xl transition-all group text-left w-full"
+                        >
+                          <div className="relative shrink-0">
+                            <img
+                              src={`https://i.ytimg.com/vi/${vid.id}/mqdefault.jpg`}
+                              alt=""
+                              loading="lazy"
+                              className="w-24 h-[54px] object-cover rounded-lg border border-slate-800"
+                            />
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <span className="w-7 h-7 rounded-full bg-black/60 group-hover:bg-rose-600/90 transition-colors flex items-center justify-center text-white text-[10px] pl-0.5">▶</span>
+                            </span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-semibold text-slate-300 group-hover:text-white leading-snug line-clamp-2">{vid.title}</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5 truncate">{vid.channel} · YouTube</p>
+                          </div>
+                        </button>
+                      )
+                    ))}
+                    <a
+                      href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedNode.skill_name + ' tutorial for beginners')}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center justify-between p-3 bg-slate-950/40 border border-dashed border-slate-800/80 hover:border-rose-500/40 rounded-2xl transition-all group"
+                    >
+                      <span className="text-[11px] font-medium text-slate-400 group-hover:text-white">
+                        More {selectedNode.skill_name} tutorials on YouTube
+                      </span>
+                      <span className="text-[10px] text-rose-400 group-hover:translate-x-1 transition-transform">➜</span>
+                    </a>
+                  </div>
+                </div>
 
                 {/* Matching Hands-on Projects */}
                 <div>
