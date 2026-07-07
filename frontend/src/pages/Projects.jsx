@@ -57,7 +57,7 @@ export default function Projects() {
 
   // Identify target role matches
   const getIsTargetMatch = (p) => {
-    return p.explanation && p.explanation.includes('🎯');
+    return p.explanation && p.explanation.includes('[TARGET]');
   };
 
   // Filter projects
@@ -154,7 +154,7 @@ export default function Projects() {
                 : 'text-slate-600 hover:text-slate-800'
             }`}
           >
-            🎯 Target Job Matches ({totalTargetCount})
+            Target Job Matches ({totalTargetCount})
           </button>
           <button
             onClick={() => setViewMode('all')}
@@ -164,7 +164,7 @@ export default function Projects() {
                 : 'text-slate-600 hover:text-slate-800'
             }`}
           >
-            🌐 Explore All ({projects.length})
+            Explore All ({projects.length})
           </button>
         </div>
 
@@ -242,7 +242,7 @@ export default function Projects() {
                     </span>
                     {isTargetMatch ? (
                       <span className="text-[10px] text-neon-cyan font-bold tracking-widest uppercase bg-neon-cyan/10 px-2 py-0.5 rounded-md border border-neon-cyan/20">
-                        🎯 JOB TRACK MATCH
+                        JOB TRACK MATCH
                       </span>
                     ) : p.match_score > 0 ? (
                       <span className="text-xs text-neon-purple font-bold">{Math.round(p.match_score * 100)}% Match</span>
@@ -308,7 +308,7 @@ export default function Projects() {
                   className="relative w-full max-h-[85vh] overflow-y-auto bg-white border border-dark-700 rounded-3xl shadow-2xl p-6 md:p-8 text-left z-10"
                 >
                   {/* Target glow top bar */}
-                  {selectedProject?.explanation?.includes('🎯') && (
+                  {selectedProject?.explanation?.includes('[TARGET]') && (
                     <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink" />
                   )}
 
@@ -328,9 +328,9 @@ export default function Projects() {
                     <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase bg-slate-100 border border-dark-700 px-2.5 py-1 rounded">
                       {selectedProject?.domain}
                     </span>
-                    {selectedProject?.explanation?.includes('🎯') && (
+                    {selectedProject?.explanation?.includes('[TARGET]') && (
                       <span className="text-[10px] text-neon-cyan font-bold tracking-widest uppercase bg-neon-cyan/10 border border-neon-cyan/20 px-2.5 py-1 rounded">
-                        🎯 Target Career Track
+                        Target Career Track
                       </span>
                     )}
                   </div>
@@ -368,28 +368,36 @@ export default function Projects() {
                       <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3">Portfolio Assessment & Alignment</h3>
                       <div className="space-y-2.5">
                         {selectedProject.explanation.split(' · ').map((part, idx) => {
-                          let icon = "";
+                          // Backend tags each clause with a plain-text token; map it to a
+                          // clean coloured label (no emoji) and strip the token from the text.
+                          let label = "";
                           let bgStyle = "bg-slate-50 border-dark-700";
                           let textColor = "text-slate-700";
-                          
-                          if (part.includes("🎯")) {
-                            icon = "🎯";
+
+                          if (part.includes("[TARGET]")) {
+                            label = "Target Role";
                             bgStyle = "bg-neon-cyan/5 border-neon-cyan/15";
                             textColor = "text-neon-cyan font-medium";
-                          } else if (part.includes("")) {
-                            icon = "";
+                          } else if (part.includes("[MATCH]")) {
+                            label = "Your Skills";
                             bgStyle = "bg-emerald-500/5 border-emerald-500/10";
                             textColor = "text-emerald-700";
-                          } else if (part.includes("")) {
-                            icon = "";
+                          } else if (part.includes("[LEARN]")) {
+                            label = "You'll Learn";
                             bgStyle = "bg-neon-purple/5 border-neon-purple/10";
                             textColor = "text-neon-purple";
                           }
 
+                          const cleanText = part.replace(/^\[(TARGET|MATCH|LEARN)\]\s*/, '');
+
                           return (
                             <div key={idx} className={`text-xs flex items-start gap-3 p-3 border rounded-2xl leading-relaxed ${bgStyle} ${textColor}`}>
-                              <span className="flex-shrink-0 text-base mt-0.5">{icon}</span>
-                              <span>{part.replace(/^[🎯]\s*/, '')}</span>
+                              {label && (
+                                <span className="flex-shrink-0 mt-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border border-current opacity-70">
+                                  {label}
+                                </span>
+                              )}
+                              <span>{cleanText}</span>
                             </div>
                           );
                         })}

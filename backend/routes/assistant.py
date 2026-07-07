@@ -81,18 +81,18 @@ def chat_with_assistant(
     
     if is_nav_intent:
         nav_map = {
-            "roadmap": ("/roadmap", "🗺️ Opening your personalized career roadmap! Here you can check required milestones and skill tracks."),
-            "skills": ("/skills", "🛠️ Opening your active skills inventory. You can add or complete skills to boost your placement readiness score."),
-            "skill": ("/skills", "🛠️ Opening your active skills inventory."),
-            "projects": ("/projects", "💻 Taking you to your Project Portfolio. Let's look at aligning your practical work to placement criteria."),
-            "project": ("/projects", "💻 Taking you to your Project Portfolio."),
-            "interview": ("/interview", "🎙️ Heading to the AI Mock Interview simulator. Ready to practice technical questions?"),
-            "resume": ("/resume", "📄 Opening the AI Resume Lab. Upload your PDF or DOCX to run ATS audits and rewrite bullet points."),
-            "challenges": ("/challenges", "💻 Opening coding challenges. Let's practice algorithms in the editor!"),
-            "challenge": ("/challenges", "💻 Opening coding challenges."),
-            "jobs": ("/jobs", "💼 Finding placement vacancies and internship openings matching your profile."),
-            "job": ("/jobs", "💼 Finding placement vacancies."),
-            "compare": ("/compare", "⚖️ Opening Career Comparison. Evaluate path overlaps side-by-side."),
+            "roadmap": ("/roadmap", "Opening your personalized career roadmap! Here you can check required milestones and skill tracks."),
+            "skills": ("/skills", "Opening your active skills inventory. You can add or complete skills to boost your placement readiness score."),
+            "skill": ("/skills", "Opening your active skills inventory."),
+            "projects": ("/projects", "Taking you to your Project Portfolio. Let's look at aligning your practical work to placement criteria."),
+            "project": ("/projects", "Taking you to your Project Portfolio."),
+            "interview": ("/interview", "Heading to the AI Mock Interview simulator. Ready to practice technical questions?"),
+            "resume": ("/resume", "Opening the AI Resume Lab. Upload your PDF or DOCX to run ATS audits and rewrite bullet points."),
+            "challenges": ("/challenges", "Opening coding challenges. Let's practice algorithms in the editor!"),
+            "challenge": ("/challenges", "Opening coding challenges."),
+            "jobs": ("/jobs", "Finding placement vacancies and internship openings matching your profile."),
+            "job": ("/jobs", "Finding placement vacancies."),
+            "compare": ("/compare", "Opening Career Comparison. Evaluate path overlaps side-by-side."),
         }
         
         for key, (path, resp) in nav_map.items():
@@ -144,7 +144,7 @@ def chat_with_assistant(
         })
         log_activity(db, uid, "add_skill", {"skill_id": doc_id, "skill_name": skill_name})
         return {
-            "response": f"✅ Core Skill added! I've linked **{skill_name}** to your skills catalog. Check the roadmap for next branches.",
+            "response": f"Core Skill added! I've linked **{skill_name}** to your skills catalog. Check the roadmap for next branches.",
             "intent": "add_skill",
             "action": {"type": "refresh_data", "route": "skills"}
         }
@@ -167,7 +167,7 @@ def chat_with_assistant(
             db.collection("users").document(uid).collection("skills").document(matched_doc.id).delete()
             log_activity(db, uid, "delete_skill", {"skill_id": matched_doc.id})
             return {
-                "response": f"❌ Removed **{matched_doc.to_dict().get('skill_name')}** from your active skills. Telemetry updated.",
+                "response": f"Removed **{matched_doc.to_dict().get('skill_name')}** from your active skills. Telemetry updated.",
                 "intent": "remove_skill",
                 "action": {"type": "refresh_data", "route": "skills"}
             }
@@ -175,12 +175,12 @@ def chat_with_assistant(
     # FAQ 1: Will projects help me get a placement / job?
     if "project" in user_message_lower and any(w in user_message_lower for w in ["placement", "job", "help", "hire", "work", "resume", "recruit", "career"]):
         return {
-            "response": "💡 **Yes, projects are highly critical for landing top job offers!**\n\n"
+            "response": "**Yes, projects are highly critical for landing top job offers!**\n\n"
                         "For college graduates and junior developers, projects act as **verified proof of execution**. Here is why they are essential:\n\n"
                         "1. **Bypasses 'No Experience' Blockers**: If you don't have previous company experience, a robust, deployed full-stack project shows you can build real software.\n"
                         "2. **Provides Interview Discussion**: Recruiters will ask you to explain your technical decisions. Having built a complex project lets you explain how you designed databases, handled API latency, or integrated AI features.\n"
                         "3. **Demonstrates Professional Tooling**: Adding standard software engineering tools (like **Docker**, **GitHub Actions/CI-CD**, and **PostgreSQL**) proves you are ready for actual production environments.\n\n"
-                        "💡 Navigate to your **[Project Portfolio](/projects)** to view recommended templates, or type *'recommend project'* to see aligned ideas!",
+                        "Navigate to your **[Project Portfolio](/projects)** to view recommended templates, or type *'recommend project'* to see aligned ideas!",
             "intent": "faq_projects"
         }
 
@@ -189,7 +189,7 @@ def chat_with_assistant(
     # it themselves in Settings or by regenerating the roadmap with a new role.
     if "data scientist" in user_message_lower or "data science" in user_message_lower:
         return {
-            "response": "📊 **Starting Data Science from Scratch (Roadmap)**:\n\n"
+            "response": "**Starting Data Science from Scratch (Roadmap)**:\n\n"
                         "To enter data science, you must master programming, data structures, statistics, and modeling frameworks. Here are the core stages:\n\n"
                         "1. **Learn Python**: Master python syntax, lists, dictionaries, functions, and object-oriented programming.\n"
                         "2. **Data Manipulation**: Deep-dive into **Pandas** and **NumPy** to clean, filter, and merge datasets.\n"
@@ -197,7 +197,7 @@ def chat_with_assistant(
                         "4. **Descriptive & Inferential Statistics**: Understand probability, distributions, hypothesis testing, and regressions.\n"
                         "5. **Machine Learning**: Learn to train classifiers, clusters, and regression models using **Scikit-Learn**.\n"
                         "6. **Visual Analysis**: Learn to build visual dashboards (using Tableau, PowerBI, or Chart.js).\n\n"
-                        "🎯 Want to pursue this path? Update your target role to **Data Scientist** in your profile settings, then check your **[Roadmap Milestones](/roadmap)**.",
+                        "Want to pursue this path? Update your target role to **Data Scientist** in your profile settings, then check your **[Roadmap Milestones](/roadmap)**.",
             "intent": "career_guidance"
         }
 
@@ -213,7 +213,7 @@ def chat_with_assistant(
             proj_lines.append(f"• **{p['project_name']}** ({p['difficulty']} | {p['domain']})\n  *Description: {p['description'][:120]}...*")
         proj_str = "\n\n".join(proj_lines)
         return {
-            "response": f"🛠️ **Recommended Projects for {target_role}**:\n\n{proj_str}\n\nType *'go to projects'* to add them to your portfolio tracker.",
+            "response": f"**Recommended Projects for {target_role}**:\n\n{proj_str}\n\nType *'go to projects'* to add them to your portfolio tracker.",
             "intent": "recommend_projects"
         }
 
@@ -230,7 +230,7 @@ def chat_with_assistant(
         level = "Advanced" if total > 80 else ("Intermediate" if total > 50 else "Beginner")
 
         return {
-            "response": f"📈 **Hiring Readiness Telemetry**:\n\n"
+            "response": f"**Hiring Readiness Telemetry**:\n\n"
                         f"• **Placement Readiness**: {total}% ({level})\n"
                         f"• **Skill Coverage Weight**: {int(skill_score * 100)}%\n"
                         f"• **Project Porting Score**: {int(project_score * 100)}%\n"
@@ -242,7 +242,7 @@ def chat_with_assistant(
     # FAQ 2: What is PFJ?
     if any(p in user_message_lower for p in ["website", "platform", "pfj", "this site", "purpose", "what is this"]):
         return {
-            "response": "🧭 **About PFJ (Path For Job)**:\n\n"
+            "response": "**About PFJ (Path For Job)**:\n\n"
                         "PFJ is an AI-powered career launchpad designed to help students transition into high-paying engineering roles.\n\n"
                         "We offer:\n"
                         "• **Market Intelligence**: Real-time hiring trends, emerging skill scores, and city-wide analysis.\n"

@@ -847,7 +847,7 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
           <div>
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 flex items-center gap-2">
-              <span>🎯</span> Placement Market Intelligence & Future Skills
+              Placement Market Intelligence & Future Skills
             </h2>
             <p className="text-xs text-slate-400 font-medium">Illustrative industry skill trends and typical salary ranges — sample guidance, not live data.</p>
           </div>

@@ -120,7 +120,7 @@ def seed_projects():
             "difficulty": "Advanced",
             "description": "Build a scalable e-commerce platform using microservices architecture with Node.js, Docker, and React.",
             "skills": ["Node.js", "React", "Docker", "Microservices"],
-            "explanation": "🎯 Target Career Track · This project directly aligns with Full Stack and Backend Engineering roles. · Demonstrates ability to handle complex system architecture and modern deployment practices.",
+            "explanation": "Target Career Track · This project directly aligns with Full Stack and Backend Engineering roles. · Demonstrates ability to handle complex system architecture and modern deployment practices.",
             "match_score": 0.95
         },
         {
@@ -129,7 +129,7 @@ def seed_projects():
             "difficulty": "Intermediate",
             "description": "Create an interactive dashboard that analyzes and visualizes large datasets using Python and React.",
             "skills": ["Python", "React", "Data Visualization", "SQL"],
-            "explanation": "🎯 Target Career Track · Excellent for Data Engineering or Full Stack paths. · Shows practical ability to handle data pipelines and frontend visualization.",
+            "explanation": "Target Career Track · Excellent for Data Engineering or Full Stack paths. · Shows practical ability to handle data pipelines and frontend visualization.",
             "match_score": 0.85
         },
         {

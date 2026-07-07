@@ -26,38 +26,12 @@ const getMatchBg = (percent) => {
   return 'bg-slate-50 border-slate-200';
 };
 
-// Helper for company logos (emojis)
 const getCompanyLogo = (name) => {
-  const logos = {
-    'Google': '🔍',
-    'OpenAI': '🧠',
-    'Stripe': '💳',
-    'Netflix': '🎬',
-    'Vercel': '▲',
-    'Meta': '♾️',
-    'Amazon': '📦',
-    'Spotify': '🎵',
-    'Microsoft': '💻',
-    'Cisco': '🔌',
-    'Qualcomm': '📶',
-    'NVIDIA': '🟢',
-    'Tesla': '⚡',
-    'Boston Dynamics': '🤖',
-    'Apple': '🍎',
-    'Intel': '🟦',
-    'Razorpay': '💳',
-    'TCS': '🏢',
-    'Palo Alto Networks': '🛡️',
-    'L&T': '🏗️',
-    'Siemens': '⚙️',
-    'HashiCorp': '☁️',
-    'CrowdStrike': '🦅',
-    'Texas Instruments': '📟',
-    'Mahindra & Mahindra': '🚜'
-  };
-  if (logos[name]) return logos[name];
+  // Monogram initials -- clean, professional, no emoji.
   if (!name) return '';
-  return name.charAt(0).toUpperCase();
+  const words = name.replace(/&/g, ' ').split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
 };
 
 export default function Jobs() {
@@ -153,7 +127,7 @@ export default function Jobs() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search bar */}
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">🔍</span>
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" /></svg></span>
             <input
               type="text"
               placeholder="Search by role, company, or skill..."
@@ -293,7 +267,7 @@ export default function Jobs() {
                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Skill Gaps</h3>
                     {job.missing_skills.length === 0 ? (
                       <div className="flex items-center gap-2 text-green-700 bg-green-50 px-2 py-1 rounded border border-green-200 w-fit">
-                        <span>🎯</span>
+                        <span className="text-green-700"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg></span>
                         <span className="text-xs font-bold">100% Match!</span>
                       </div>
                     ) : (
@@ -314,7 +288,7 @@ export default function Jobs() {
                 {/* Hover Action */}
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4 pointer-events-none">
                   <span className="text-neon-cyan text-xs font-bold tracking-widest drop-shadow-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 uppercase">
-                    {job.match_percentage >= 70 ? '🎯 High Match - Click to view brief' : '🔍 Study Gaps - Click to view brief'}
+                    {job.match_percentage >= 70 ? 'High Match - Click to view brief' : 'Study Gaps - Click to view brief'}
                   </span>
                 </div>
               </motion.div>
@@ -467,7 +441,7 @@ export default function Jobs() {
                       <h3 className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2.5">Skill Gap Breakdown</h3>
                       {(selectedJob.missing_skills || []).length === 0 ? (
                         <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 px-3 py-2 rounded-2xl">
-                          <span className="text-base">🎯</span>
+                          <span className="text-green-700"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg></span>
                           <span className="text-xs font-bold">100% Prepared for placement!</span>
                         </div>
                       ) : (

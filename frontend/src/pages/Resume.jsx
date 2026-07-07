@@ -543,7 +543,7 @@ export default function Resume() {
                               className="cursor-pointer flex flex-col items-center text-center select-none group"
                             >
                               <div className="w-14 h-14 rounded-xl bg-dark-800 border border-dark-750 flex items-center justify-center text-2xl mb-4 group-hover:border-neon-cyan/40 transition-colors shadow-inner">
-                                📥
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
                               </div>
                               <span className="text-xs text-slate-300 font-bold mb-1 group-hover:text-neon-cyan transition-colors">
                                 Drag & Drop Resume File
@@ -595,7 +595,7 @@ export default function Resume() {
                   {/* Social Profile Credentials */}
                   <div className="glass-card p-5 border-dark-700 space-y-4">
                     <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-dark-800 pb-2 flex items-center gap-2">
-                      <span>🔗</span> Linked Developer Accounts
+                      Linked Developer Accounts
                     </h3>
                     
                     <div className="space-y-3">
@@ -734,7 +734,7 @@ export default function Resume() {
                     </div>
                   ) : (
                     <div className="glass-card h-full flex flex-col items-center justify-center py-20 border-dashed border border-dark-800">
-                      <span className="text-4xl mb-4">🔬</span>
+                      
                       <h4 className="text-sm font-bold text-slate-400 mb-1">Telemetry Monitor Idle</h4>
                       <p className="text-xs text-slate-600 max-w-xs text-center">
                         Upload your resume to output parsed parameters and timeline indexes.
@@ -757,7 +757,7 @@ export default function Resume() {
               >
                 {!result ? (
                   <div className="glass-card text-center py-20 border-dashed border border-dark-850">
-                    <p className="text-4xl mb-4">🎯</p>
+                    
                     <p className="text-slate-400 text-sm font-bold">Resume Parsing Required</p>
                     <p className="text-xs text-slate-600 mt-1">Please connect your resume file in the Parse Portal first.</p>
                   </div>
@@ -800,7 +800,7 @@ export default function Resume() {
 
                         <p className="text-xs text-slate-400 leading-relaxed bg-dark-900/60 p-3 rounded-lg border border-dark-800">
                           {result.ats_analysis?.word_count < 300 
-                            ? "🚨 Resume word count is low. Add more project complexities or job achievements to rank higher on semantic match models." 
+                            ? "Resume word count is low. Add more project complexities or job achievements to rank higher on semantic match models." 
                             : result.ats_analysis?.word_count <= 800 
                               ? "✓ Ideal text density. Spacing and readability score are fully optimized." 
                               : " Text density is high. Condense sentences to fit a compact 1-2 page format."
@@ -925,7 +925,7 @@ export default function Resume() {
                       <AnimatePresence mode="wait">
                         {!matchResult ? (
                           <div className="glass-card h-full flex flex-col items-center justify-center py-20 border-dashed border border-dark-800">
-                            <span className="text-3xl mb-3">🛰️</span>
+                            
                             <h4 className="text-xs font-bold text-slate-400 mb-1">Similarity Engine Standby</h4>
                             <p className="text-[10px] text-slate-600 text-center max-w-[240px]">
                               Provide target requirements on the left to compute compatibility aggregates.
@@ -949,9 +949,9 @@ export default function Resume() {
                               <div className="glass-card p-5 border-dark-700 flex flex-col justify-between">
                                 <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">Role Alignment Status</h4>
                                 <div className="text-xl font-black text-slate-200">
-                                  {matchResult.match_score >= 80 ? '🔥 Highly Competitive' :
-                                   matchResult.match_score >= 60 ? ' Strong Match Candidate' :
-                                   matchResult.match_score >= 35 ? ' Gaps Detected' : '🚨 Low Match Alignment'}
+                                  {matchResult.match_score >= 80 ? 'Highly Competitive' :
+                                   matchResult.match_score >= 60 ? 'Strong Match Candidate' :
+                                   matchResult.match_score >= 35 ? 'Gaps Detected' : 'Low Match Alignment'}
                                 </div>
                                 <p className="text-[10px] text-slate-400 leading-relaxed mt-2 border-t border-dark-800 pt-2">
                                   We detected {matchResult.matched_skills?.length || 0} overlapping skills and {matchResult.missing_skills?.length || 0} gaps.
@@ -1123,7 +1123,7 @@ export default function Resume() {
                           <h3 className="text-2xl font-black text-slate-200">
                             {result.internship_readiness >= 80 ? ' Highly Deployable' :
                              result.internship_readiness >= 60 ? ' Good Placement Outlook' :
-                             result.internship_readiness >= 40 ? ' Moderate Readiness' : '🚨 Action Required'}
+                             result.internship_readiness >= 40 ? 'Moderate Readiness' : 'Action Required'}
                           </h3>
                           <p className="text-[10px] text-slate-500 leading-relaxed font-sans max-w-[280px]">
                             Sigmoid hiring simulation based on repository velocity, ATS score, and tech overlap matrices.

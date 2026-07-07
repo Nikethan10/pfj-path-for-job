@@ -171,7 +171,7 @@ export default function Skills() {
           
           <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
             <span className="flex items-center gap-2 text-slate-700 font-sans text-sm font-extrabold">
-              <span>🎯</span> {userProfile.target_role} Pathway Unlock Progress
+              {userProfile.target_role} Pathway Unlock Progress
             </span>
             <span className="text-neon-cyan font-mono text-sm">{addedAimSkillsCount} / {totalAimSkillsCount} Skills ({pathReadinessPercent}%)</span>
           </div>
@@ -205,13 +205,13 @@ export default function Skills() {
                 onClick={() => handleToggleFilter(true)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${filterByAim ? 'bg-white border border-neon-cyan/30 text-neon-cyan shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                🎯 Aim Skills
+                Aim Skills
               </button>
               <button
                 onClick={() => handleToggleFilter(false)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${!filterByAim ? 'bg-white border border-neon-cyan/30 text-neon-cyan shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                🌐 Show All
+                Show All
               </button>
             </div>
           )}
@@ -220,7 +220,7 @@ export default function Skills() {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">🔍</span>
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" /></svg></span>
             <input
               type="text"
               placeholder="Search available skills by name or category (e.g. React, ML, VLSI)..."
@@ -253,7 +253,7 @@ export default function Skills() {
                         title={`Click to add ${s.skill_name} (${category})`}
                       >
                         <span>{s.skill_name}</span>
-                        <span className="text-neon-cyan font-bold">{isBeingAdded ? '⏳' : '＋'}</span>
+                        <span className="text-neon-cyan font-bold">{isBeingAdded ? <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> : '＋'}</span>
                       </button>
                     );
                   })}
@@ -303,7 +303,7 @@ export default function Skills() {
                           className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan flex items-center gap-1 shadow-sm select-none"
                           title="Required/recommended for your target role"
                         >
-                          🎯 Aim
+                          Aim
                         </span>
                       )}
                       <button 

@@ -10,31 +10,35 @@ const TIER_RING: Record<string, string> = {
   gold: '#eab308',
 };
 
-const ICON_GLYPH: Record<string, string> = {
-  skill: '🛠️',
-  star: '⭐',
-  rocket: '🚀',
-  doc: '📄',
-  mic: '🎙️',
-  code: '💻',
-  map: '🗺️',
-  flame: '🔥',
-  trophy: '🏆',
+// Monochrome line-icon paths (drawn with currentColor) — no emoji.
+const ICON_PATH: Record<string, string> = {
+  skill: 'M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8 7.2 20l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.1-2.1 2.6-2.5z', // wrench
+  star: 'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.6 1-5.8L3.5 9.7l5.9-.9L12 3.5z',
+  rocket: 'M5 15c-1 2-1 5-1 5s3 0 5-1m-4-4a12 12 0 0 1 9-9c3 0 4 1 4 4a12 12 0 0 1-9 9l-4-4zm5-1a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+  doc: 'M7 3h7l5 5v13H7V3zm7 0v5h5', // document
+  mic: 'M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v4', // microphone
+  code: 'M9 8l-5 4 5 4M15 8l5 4-5 4', // code brackets
+  map: 'M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zm0 0v14m6-12v14', // map
+  flame: 'M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2.5-5 0 1.5 1 2.5 2 2.5-.5-3 .5-5 .5-6.5z', // flame
+  trophy: 'M7 4h10v4a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M10 15h4M8 20h8M12 15v5', // trophy
 };
 
 function Medal({ badge }: { badge: Badge }) {
   const ring = TIER_RING[badge.tier] || '#94a3b8';
+  const path = ICON_PATH[badge.icon] || 'M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.6 1-5.8L3.5 9.2l5.9-.9L12 3z';
   return (
     <div
       className="relative shrink-0"
-      style={{ filter: badge.earned ? 'none' : 'grayscale(1)', opacity: badge.earned ? 1 : 0.45 }}
+      style={{ opacity: badge.earned ? 1 : 0.4 }}
     >
       <svg width="60" height="60" viewBox="0 0 64 64" aria-hidden="true">
         <circle cx="32" cy="32" r="28" fill="#ffffff" stroke={ring} strokeWidth="4" />
         <circle cx="32" cy="32" r="22" fill={ring} fillOpacity="0.14" />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-2xl">
-        {ICON_GLYPH[badge.icon] || '🏅'}
+      <span className="absolute inset-0 flex items-center justify-center" style={{ color: ring }}>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d={path} />
+        </svg>
       </span>
     </div>
   );

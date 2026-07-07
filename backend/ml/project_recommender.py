@@ -48,15 +48,15 @@ def recommend_projects(
         if target_role and role_overlap:
             # Find which original casing skills are target skills
             role_overlap_orig = [s for s in project["skills"] if s.lower().strip() in role_overlap]
-            parts.append(f"🎯 Essential for {target_role} ({', '.join(role_overlap_orig)})")
+            parts.append(f"[TARGET] Essential for {target_role} ({', '.join(role_overlap_orig)})")
         
         if matching:
             matching_orig = [s for s in project["skills"] if s.lower().strip() in matching]
-            parts.append(f"✅ Uses your skills: {', '.join(matching_orig)}")
+            parts.append(f"[MATCH] Uses your skills: {', '.join(matching_orig)}")
             
         if new_skills:
             new_orig = [s for s in project["skills"] if s.lower().strip() in new_skills]
-            parts.append(f"🚀 You will learn: {', '.join(new_orig)}")
+            parts.append(f"[LEARN] You will learn: {', '.join(new_orig)}")
 
         scored.append({
             **project,

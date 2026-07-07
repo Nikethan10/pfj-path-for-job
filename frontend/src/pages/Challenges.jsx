@@ -297,7 +297,7 @@ export default function Challenges() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-              <span className="text-5xl mb-4">🔍</span>
+              <span className="mb-4 text-slate-300"><svg className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" /></svg></span>
               <p>No {difficultyFilter.toLowerCase()} challenges found.</p>
             </div>
           )}

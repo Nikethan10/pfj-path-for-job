@@ -7,22 +7,6 @@ import { generateRoadmap, getRoadmap, updateRoadmapStatus, generateQuiz, submitQ
 import { getProjects } from '../services/projectService';
 import Loader from '../components/Loader';
 
-// Emojis based on category for a visual pop
-const getCategoryIcon = (cat) => {
-  if (!cat) return '📚';
-  const c = cat.toLowerCase();
-  if (c.includes('backend') || c.includes('api') || c.includes('server')) return '⚙️';
-  if (c.includes('frontend') || c.includes('ui') || c.includes('react')) return '🎨';
-  if (c.includes('database') || c.includes('sql') || c.includes('mongo')) return '🗄️';
-  if (c.includes('devops') || c.includes('cloud') || c.includes('aws') || c.includes('ci/cd')) return '☁️';
-  if (c.includes('security') || c.includes('crypto')) return '🔐';
-  if (c.includes('data') || c.includes('analyst') || c.includes('stats')) return '📊';
-  if (c.includes('ml') || c.includes('deep') || c.includes('nlp') || c.includes('vision')) return '🤖';
-  if (c.includes('hardware') || c.includes('embedded') || c.includes('circuit') || c.includes('vlsi') || c.includes('rtos')) return '🔌';
-  if (c.includes('mechanical') || c.includes('thermo') || c.includes('cad') || c.includes('robot')) return '🦾';
-  return '📚';
-};
-
 // Curated YouTube tutorials per skill. Every video ID below was validated against
 // YouTube's oEmbed API (alive + embeddable) before shipping; titles/channels are
 // the canonical ones YouTube returned. Skills without an entry fall back to a
@@ -31,7 +15,7 @@ const SKILL_VIDEOS = {
   "Python": [{ id: "rfscVS0vtbw", title: "Learn Python - Full Course for Beginners [Tutorial]", channel: "freeCodeCamp.org" }, { id: "_uQrJ0TkZlc", title: "Python Full Course for Beginners", channel: "Programming with Mosh" }],
   "JavaScript": [{ id: "PkZNo7MFNFg", title: "Learn JavaScript - Full Course for Beginners", channel: "freeCodeCamp.org" }, { id: "W6NZfCO5SIk", title: "JavaScript Course for Beginners – Your First Step to Web Development", channel: "Programming with Mosh" }],
   "TypeScript": [{ id: "30LWjhZzg50", title: "Learn TypeScript – Full Tutorial", channel: "freeCodeCamp.org" }, { id: "d56mG7DezGs", title: "TypeScript Tutorial for Beginners", channel: "Programming with Mosh" }],
-  "Java": [{ id: "eIrMbAQSU34", title: "Java Full Course for Beginners", channel: "Programming with Mosh" }, { id: "xk4_1vDrzzo", title: "Java Full Course for free ☕", channel: "Bro Code" }],
+  "Java": [{ id: "eIrMbAQSU34", title: "Java Full Course for Beginners", channel: "Programming with Mosh" }, { id: "xk4_1vDrzzo", title: "Java Full Course for free", channel: "Bro Code" }],
   "C++": [{ id: "vLnPwxZdW4Y", title: "C++ Tutorial for Beginners - Full Course", channel: "freeCodeCamp.org" }, { id: "8jLOx1hD3_o", title: "C++ Programming Course - Beginner to Advanced", channel: "freeCodeCamp.org" }],
   "HTML/CSS": [{ id: "pQN-pnXPaVg", title: "HTML Full Course - Build a Website Tutorial", channel: "freeCodeCamp.org" }, { id: "OXGznpKZ_sA", title: "CSS Tutorial – Full Course for Beginners", channel: "freeCodeCamp.org" }],
   "React": [{ id: "bMknfKXIFA8", title: "React Course - Beginner's Tutorial for React JavaScript Library [2022]", channel: "freeCodeCamp.org" }, { id: "w7ejDZ8SWv8", title: "React JS Crash Course", channel: "Traversy Media" }],
@@ -65,7 +49,7 @@ const SKILL_VIDEOS = {
   "Data Visualization": [{ id: "_8V5o2UHG0E", title: "Data Visualization with D3.js - Full Tutorial Course", channel: "freeCodeCamp.org" }, { id: "a9UrKTVEeZA", title: "Intro to Data Analysis / Visualization with Python, Matplotlib and Pandas | Matplotlib Tutorial", channel: "CS Dojo" }],
   "Excel": [{ id: "Vl0H-qTclOg", title: "Microsoft Excel Tutorial for Beginners - Full Course", channel: "freeCodeCamp.org" }, { id: "rwbho0CgEAE", title: "The Beginner's Guide to Excel - Excel Basics Tutorial", channel: "Technology for Teachers and Students" }],
   "Tableau": [{ id: "aHaOIvR00So", title: "Tableau Full Course - Learn Tableau in 6 Hours | Tableau Training for Beginners | Edureka", channel: "edureka!" }],
-  "Power BI": [{ id: "AGrl-H87pRU", title: "Power BI Tutorial From Beginner to Pro ⚡ Desktop to Dashboard in 60 Minutes ⏰", channel: "Avi Singh - PowerBIPro" }, { id: "77jIzgvCIYY", title: "Hands-On Power BI Tutorial 📊 Beginner to Pro [Full Course] 2023 Edition⚡", channel: "Pragmatic Works" }],
+  "Power BI": [{ id: "AGrl-H87pRU", title: "Power BI Tutorial From Beginner to Pro Desktop to Dashboard in 60 Minutes", channel: "Avi Singh - PowerBIPro" }, { id: "77jIzgvCIYY", title: "Hands-On Power BI Tutorial Beginner to Pro [Full Course] 2023 Edition", channel: "Pragmatic Works" }],
   "R": [{ id: "_V8eKsto3Ug", title: "R Programming Tutorial - Learn the Basics of Statistical Computing", channel: "freeCodeCamp.org" }, { id: "KlsYCECWEWE", title: "R Tutorial For Beginners 2026 | R Programming Full Course In 7 Hours | R Tutorial | Simplilearn", channel: "Simplilearn" }],
   "Linear Algebra": [{ id: "fNk_zzaMoSs", title: "Vectors | Chapter 1, Essence of linear algebra", channel: "3Blue1Brown" }, { id: "JnTa9XtvmfI", title: "Linear Algebra - Full College Course", channel: "freeCodeCamp.org" }],
   "Network Security": [{ id: "qiQR5rTSshw", title: "Computer Networking Course - Network Engineering [CompTIA Network+ Exam Prep]", channel: "freeCodeCamp.org" }, { id: "3QhU9jd03a0", title: "Computer Networks: Crash Course Computer Science #28", channel: "CrashCourse" }],
@@ -830,9 +814,9 @@ const RoadmapNode = ({ data }) => {
         <div className="absolute inset-0 border-2 border-violet-500 rounded-2xl animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] opacity-25 pointer-events-none" />
       )}
 
-      {/* Huge faded background icon */}
-      <div className="absolute -right-4 -bottom-6 text-8xl opacity-[0.04] grayscale group-hover:grayscale-0 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 pointer-events-none">
-        {getCategoryIcon(data.skill_name)}
+      {/* Huge faded background monogram (first letter of the skill) */}
+      <div className="absolute -right-4 -bottom-10 text-[7rem] font-black opacity-[0.05] group-hover:opacity-[0.09] transition-all duration-500 pointer-events-none select-none text-slate-100">
+        {(data.skill_name || '').charAt(0)}
       </div>
 
       <Handle type="target" position={Position.Top} className="!w-3 !h-3 !border-2 !border-slate-900 !bg-violet-500 shadow-sm" />
@@ -873,7 +857,7 @@ const RoadmapNode = ({ data }) => {
                   ? 'bg-amber-500/20 border border-amber-500/30 text-amber-400' 
                   : 'bg-violet-500/20 border border-violet-500/30 text-violet-400'
           }`}>
-            {getCategoryIcon(data.category)} {data.category}
+            {data.category}
           </span>
         </div>
       </div>
@@ -898,7 +882,7 @@ const RoadmapNode = ({ data }) => {
             ? 'bg-slate-100 border-slate-200 text-slate-700' 
             : 'bg-[#1e2030]/60 border-slate-800/80 text-slate-400'
         }`}>
-          ⏱️ {data.estimated_weeks} WKS
+          {data.estimated_weeks} WKS
         </span>
         
         <div className="flex items-center gap-1.5">
@@ -1344,7 +1328,7 @@ export default function Roadmap() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                    <span className="font-semibold text-slate-200">🔥 Ongoing Focus</span>
+                    <span className="font-semibold text-slate-200">Ongoing Focus</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-violet-500" />
@@ -1373,7 +1357,7 @@ export default function Roadmap() {
                 <div className="flex justify-between items-start mb-4 pb-3 border-b border-slate-800">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl">{getCategoryIcon(selectedNode.skill_name)}</span>
+                      <span className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sm font-black text-slate-300 shrink-0">{(selectedNode.skill_name || '').charAt(0)}</span>
                       <h2 className="font-extrabold text-white text-lg truncate">{selectedNode.skill_name}</h2>
                     </div>
                     <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded text-[10px] uppercase tracking-wider font-extrabold bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan">
@@ -1493,8 +1477,8 @@ export default function Roadmap() {
                           className="flex items-center justify-between p-3.5 bg-slate-950/40 border border-slate-800/80 hover:border-emerald-500/40 hover:bg-emerald-500/5 rounded-2xl transition-all group"
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-lg">
-                              {res.type === 'doc' ? '📄' : res.type === 'video' ? '▶️' : '🧭'}
+                            <span className="text-[9px] font-bold tracking-wider px-1.5 py-1 rounded border border-slate-700 text-slate-400 uppercase shrink-0 w-12 text-center">
+                              {res.type === 'doc' ? 'Doc' : res.type === 'video' ? 'Video' : 'Guide'}
                             </span>
                             <span className="text-xs font-medium text-slate-300 group-hover:text-white">{res.name}</span>
                           </div>
