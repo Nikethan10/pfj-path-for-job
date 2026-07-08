@@ -61,6 +61,13 @@ body {
   }
 }
 
+/* Subtle dotted grid behind the dashboard (the `bg-grid` utility was never
+   defined, so the background rendered blank). */
+.bg-grid {
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
 /* Hide native Edge/IE password reveal and clear button */
 input::-ms-reveal,
 input::-ms-clear {

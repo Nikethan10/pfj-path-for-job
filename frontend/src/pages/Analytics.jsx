@@ -309,21 +309,21 @@ export default function Analytics() {
               {/* Insights and Recommendations List */}
               <div className="lg:col-span-2 glass-card flex flex-col justify-between p-6 md:p-8">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-neon-purple animate-pulse" /> AI Career Insights
                   </h3>
                   <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2">
                     {insightsList.map((ins, idx) => (
-                      <div key={idx} className="flex gap-4 items-start p-3 bg-white/5 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                      <div key={idx} className="flex gap-4 items-start p-3 bg-slate-50 border border-dark-700 rounded-2xl hover:border-neon-cyan/30 transition-colors">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
-                          ins.priority === 'High' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 
-                          ins.priority === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
-                          'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          ins.priority === 'High' ? 'bg-rose-500/10 text-rose-700 border border-rose-500/20' :
+                          ins.priority === 'Medium' ? 'bg-amber-500/10 text-amber-700 border border-amber-500/20' :
+                          'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
                         }`}>
                           {ins.priority}
                         </span>
                         <div className="space-y-1">
-                          <p className="text-xs text-gray-300 font-medium leading-relaxed">{ins.text}</p>
+                          <p className="text-xs text-slate-700 font-medium leading-relaxed">{ins.text}</p>
                           <p className="text-[11px] text-neon-cyan italic"> Recommended: {ins.action}</p>
                         </div>
                       </div>

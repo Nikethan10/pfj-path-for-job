@@ -445,7 +445,7 @@ export default function Resume() {
               flex items-center gap-2.5 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200
               ${activeTab === tab.id 
                 ? 'bg-gradient-to-r from-neon-cyan/20 to-blue-500/10 border border-neon-cyan/40 text-neon-cyan shadow-[0_0_15px_rgba(6,182,212,0.15)]' 
-                : 'hover:bg-dark-800 border border-transparent text-slate-400 hover:text-slate-200'
+                : 'hover:bg-dark-800 border border-transparent text-slate-400 hover:text-slate-800'
               }
             `}
           >
@@ -545,7 +545,7 @@ export default function Resume() {
                               <div className="w-14 h-14 rounded-xl bg-dark-800 border border-dark-750 flex items-center justify-center text-2xl mb-4 group-hover:border-neon-cyan/40 transition-colors shadow-inner">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
                               </div>
-                              <span className="text-xs text-slate-300 font-bold mb-1 group-hover:text-neon-cyan transition-colors">
+                              <span className="text-xs text-slate-700 font-bold mb-1 group-hover:text-neon-cyan transition-colors">
                                 Drag & Drop Resume File
                               </span>
                               <span className="text-[10px] text-slate-500 mb-3">
@@ -559,7 +559,7 @@ export default function Resume() {
                               </div>
                               
                               <div className="space-y-0.5 max-w-[200px] mb-2">
-                                <p className="text-xs text-slate-300 font-bold truncate">{file.name}</p>
+                                <p className="text-xs text-slate-700 font-bold truncate">{file.name}</p>
                                 <p className="text-[10px] text-slate-500 font-mono">
                                   {(file.size / 1024).toFixed(1)} KB
                                 </p>
@@ -587,7 +587,7 @@ export default function Resume() {
                         placeholder="Paste full text copied from your resume..."
                         value={text}
                         onChange={(e) => setText(e.target.value)}
-                        className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-300 placeholder-slate-600 focus:outline-none focus:border-neon-cyan transition-all resize-none"
+                        className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-neon-cyan transition-all resize-none"
                       />
                     </div>
                   )}
@@ -608,7 +608,7 @@ export default function Resume() {
                             placeholder="octocat"
                             value={githubInput}
                             onChange={(e) => setGithubInput(e.target.value)}
-                            className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg py-2 pl-24 pr-3 text-slate-300 focus:outline-none focus:border-neon-cyan"
+                            className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg py-2 pl-24 pr-3 text-slate-700 focus:outline-none focus:border-neon-cyan"
                           />
                         </div>
                       </div>
@@ -620,7 +620,7 @@ export default function Resume() {
                           placeholder="Paste your LinkedIn 'About' summary text..."
                           value={linkedinInput}
                           onChange={(e) => setLinkedinInput(e.target.value)}
-                          className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-2.5 text-slate-300 focus:outline-none focus:border-neon-cyan resize-none"
+                          className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-2.5 text-slate-700 focus:outline-none focus:border-neon-cyan resize-none"
                         />
                       </div>
                     </div>
@@ -648,7 +648,7 @@ export default function Resume() {
                     <div className="glass-card p-6 border-dark-700 space-y-6">
                       <div className="flex justify-between items-center border-b border-dark-800 pb-3">
                         <div>
-                          <h3 className="text-lg font-black text-slate-200">{result.extracted_data?.name || 'Applicant'}</h3>
+                          <h3 className="text-lg font-black text-slate-800">{result.extracted_data?.name || 'Applicant'}</h3>
                           <p className="text-xs text-slate-500">{result.extracted_data?.email || 'email@example.com'}</p>
                         </div>
                         <span className="text-[10px] px-2.5 py-1 bg-purple-500/10 border border-purple-500/30 text-neon-purple rounded font-bold uppercase tracking-wider">
@@ -663,7 +663,7 @@ export default function Resume() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {result.extracted_data.education.map((edu, idx) => (
                               <div key={idx} className="bg-dark-900/40 p-3 rounded-lg border border-dark-800">
-                                <p className="text-xs font-bold text-slate-300">{edu.degree}</p>
+                                <p className="text-xs font-bold text-slate-700">{edu.degree}</p>
                                 <p className="text-[10px] text-slate-500">{edu.institution} | Class of {edu.year}</p>
                               </div>
                             ))}
@@ -694,7 +694,7 @@ export default function Resume() {
                               <div key={idx} className="relative space-y-1">
                                 <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-neon-cyan border border-dark-900 rounded-full" />
                                 <div className="flex justify-between items-start">
-                                  <h5 className="text-xs font-bold text-slate-300">{exp.role}</h5>
+                                  <h5 className="text-xs font-bold text-slate-700">{exp.role}</h5>
                                   <span className="text-[9px] font-mono text-slate-500">{exp.duration}</span>
                                 </div>
                                 <p className="text-[10px] text-slate-500 font-bold">{exp.company}</p>
@@ -715,7 +715,7 @@ export default function Resume() {
                             {result.extracted_data.projects.map((proj, idx) => (
                               <div key={idx} className="bg-dark-900/40 p-4 rounded-xl border border-dark-800 flex flex-col justify-between">
                                 <div>
-                                  <h5 className="text-xs font-bold text-slate-300 mb-1">{proj.title}</h5>
+                                  <h5 className="text-xs font-bold text-slate-700 mb-1">{proj.title}</h5>
                                   <p className="text-[10px] text-slate-400 leading-relaxed mb-3 line-clamp-3">{proj.description}</p>
                                 </div>
                                 <div className="flex flex-wrap gap-1">
@@ -778,7 +778,7 @@ export default function Resume() {
                         <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-wider border-b border-dark-800 pb-2">Word Density Audit</h4>
                         
                         <div className="flex justify-between items-baseline">
-                          <span className="text-3xl font-black text-slate-200">{result.ats_analysis?.word_count || 0}</span>
+                          <span className="text-3xl font-black text-slate-800">{result.ats_analysis?.word_count || 0}</span>
                           <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Words parsed</span>
                         </div>
 
@@ -822,7 +822,7 @@ export default function Resume() {
                               key={idx} 
                               className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${
                                 item.passed 
-                                  ? 'bg-emerald-500/5 border-emerald-500/10 text-slate-300' 
+                                  ? 'bg-emerald-500/5 border-emerald-500/10 text-slate-700' 
                                   : 'bg-rose-500/5 border-rose-500/10 text-slate-400'
                               }`}
                             >
@@ -848,7 +848,7 @@ export default function Resume() {
                                 <span className="text-xs font-bold font-mono text-neon-cyan bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded">
                                   ALERT {String(idx + 1).padStart(2, '0')}
                                 </span>
-                                <p className="text-xs text-slate-300 leading-relaxed font-sans">{issue}</p>
+                                <p className="text-xs text-slate-700 leading-relaxed font-sans">{issue}</p>
                               </div>
                             ))}
                           </div>
@@ -901,7 +901,7 @@ export default function Resume() {
                           placeholder="Paste requirements, technical stack specifications, or general job description here..."
                           value={jobDescription}
                           onChange={(e) => setJobDescription(e.target.value)}
-                          className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-3.5 text-slate-300 placeholder-slate-600 focus:outline-none focus:border-neon-cyan resize-none"
+                          className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-3.5 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-neon-cyan resize-none"
                         />
 
                         <button
@@ -948,7 +948,7 @@ export default function Resume() {
 
                               <div className="glass-card p-5 border-dark-700 flex flex-col justify-between">
                                 <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">Role Alignment Status</h4>
-                                <div className="text-xl font-black text-slate-200">
+                                <div className="text-xl font-black text-slate-800">
                                   {matchResult.match_score >= 80 ? 'Highly Competitive' :
                                    matchResult.match_score >= 60 ? 'Strong Match Candidate' :
                                    matchResult.match_score >= 35 ? 'Gaps Detected' : 'Low Match Alignment'}
@@ -974,7 +974,7 @@ export default function Resume() {
                                       }`}
                                     >
                                       <div className="flex justify-between items-center mb-1">
-                                        <span className="text-[10px] font-bold text-slate-300 truncate mr-1">{item.skill}</span>
+                                        <span className="text-[10px] font-bold text-slate-700 truncate mr-1">{item.skill}</span>
                                         <span className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded ${
                                           item.importance === 'High' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
                                           item.importance === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
@@ -1070,7 +1070,7 @@ export default function Resume() {
                           <div className="flex justify-between items-baseline py-1">
                             <div>
                               <span className="text-[10px] text-slate-500 block uppercase tracking-wider font-bold">Min Estimated</span>
-                              <span className="text-lg font-black text-slate-300">₹{(result.salary_estimation.min_salary / 100000).toFixed(1)} LPA</span>
+                              <span className="text-lg font-black text-slate-700">₹{(result.salary_estimation.min_salary / 100000).toFixed(1)} LPA</span>
                             </div>
                             <div className="text-center bg-dark-900/60 border border-dark-800 rounded-xl px-4 py-2">
                               <span className="text-[9px] text-slate-500 block uppercase tracking-wider font-bold">Market Average</span>
@@ -1078,7 +1078,7 @@ export default function Resume() {
                             </div>
                             <div className="text-right">
                               <span className="text-[10px] text-slate-500 block uppercase tracking-wider font-bold">Max Estimated</span>
-                              <span className="text-lg font-black text-slate-300">₹{(result.salary_estimation.max_salary / 100000).toFixed(1)} LPA</span>
+                              <span className="text-lg font-black text-slate-700">₹{(result.salary_estimation.max_salary / 100000).toFixed(1)} LPA</span>
                             </div>
                           </div>
 
@@ -1120,7 +1120,7 @@ export default function Resume() {
                       <div className="glass-card p-5 border-dark-700 flex justify-between items-center relative overflow-hidden">
                         <div className="space-y-1.5">
                           <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Placement Probability</h4>
-                          <h3 className="text-2xl font-black text-slate-200">
+                          <h3 className="text-2xl font-black text-slate-800">
                             {result.internship_readiness >= 80 ? ' Highly Deployable' :
                              result.internship_readiness >= 60 ? ' Good Placement Outlook' :
                              result.internship_readiness >= 40 ? 'Moderate Readiness' : 'Action Required'}
@@ -1174,7 +1174,7 @@ export default function Resume() {
                                 <span className="text-[10px] px-2 py-0.5 bg-dark-900 border border-dark-800 text-slate-400 rounded font-mono">
                                   PROJECT {String(idx + 1).padStart(2, '0')}
                                 </span>
-                                <h4 className="text-sm font-bold text-slate-200">{proj.title}</h4>
+                                <h4 className="text-sm font-bold text-slate-800">{proj.title}</h4>
                               </div>
                               <p className="text-xs text-slate-400 leading-relaxed font-sans mt-2">{proj.description}</p>
                             </div>
@@ -1288,7 +1288,7 @@ export default function Resume() {
                               placeholder="Enter GitHub Username..."
                               value={githubInput}
                               onChange={(e) => setGithubInput(e.target.value)}
-                              className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-2.5 text-slate-300 focus:outline-none focus:border-neon-cyan"
+                              className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-2.5 text-slate-700 focus:outline-none focus:border-neon-cyan"
                             />
                             <button
                               onClick={handleSocialConnect}
@@ -1304,7 +1304,7 @@ export default function Resume() {
                           <div className="flex items-center gap-3 border-b border-dark-800 pb-3">
                             <span className="text-2xl"></span>
                             <div>
-                              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">GitHub Scraper Audit</h3>
+                              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">GitHub Scraper Audit</h3>
                               <p className="text-[9px] text-slate-500">github.com/{result.github_analysis?.username || 'candidate'}</p>
                             </div>
                             <span className="ml-auto text-xs font-black text-neon-cyan">
@@ -1316,7 +1316,7 @@ export default function Resume() {
                           <div className="grid grid-cols-2 gap-3">
                             <div className="bg-dark-900/60 p-3 rounded-lg border border-dark-800">
                               <span className="text-[9px] text-slate-500 block uppercase tracking-wider">Public Repos</span>
-                              <span className="text-base font-extrabold text-slate-300">{result.github_analysis?.public_repos || 0}</span>
+                              <span className="text-base font-extrabold text-slate-700">{result.github_analysis?.public_repos || 0}</span>
                             </div>
                             <div className="bg-dark-900/60 p-3 rounded-lg border border-dark-800">
                               <span className="text-[9px] text-slate-500 block uppercase tracking-wider">Commit Velocity</span>
@@ -1326,11 +1326,11 @@ export default function Resume() {
                             </div>
                             <div className="bg-dark-900/60 p-3 rounded-lg border border-dark-800">
                               <span className="text-[9px] text-slate-500 block uppercase tracking-wider">Stars Earned</span>
-                              <span className="text-base font-extrabold text-slate-300">{result.github_analysis?.stars || 0}</span>
+                              <span className="text-base font-extrabold text-slate-700">{result.github_analysis?.stars || 0}</span>
                             </div>
                             <div className="bg-dark-900/60 p-3 rounded-lg border border-dark-800">
                               <span className="text-[9px] text-slate-500 block uppercase tracking-wider">Total Forks</span>
-                              <span className="text-base font-extrabold text-slate-300">{result.github_analysis?.forks || 0}</span>
+                              <span className="text-base font-extrabold text-slate-700">{result.github_analysis?.forks || 0}</span>
                             </div>
                           </div>
 
@@ -1368,7 +1368,7 @@ export default function Resume() {
                       {/* Live rewriter tool */}
                       <div className="glass-card p-6 border-dark-700 space-y-4">
                         <div>
-                          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1">AI Resume Bullet Polisher</h3>
+                          <h3 className="text-xs font-bold text-slate-700 uppercase tracking-widest mb-1">AI Resume Bullet Polisher</h3>
                           <p className="text-[10px] text-slate-500">Transform passive phrases into STAR quantitative achievements.</p>
                         </div>
 
@@ -1378,7 +1378,7 @@ export default function Resume() {
                             placeholder="Type a dry bullet point e.g., 'Helped build a web application using React and Flask.'"
                             value={bulletToRewrite}
                             onChange={(e) => setBulletToRewrite(e.target.value)}
-                            className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-300 placeholder-slate-600 focus:outline-none focus:border-neon-cyan resize-none"
+                            className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-neon-cyan resize-none"
                           />
                           
                           <button
@@ -1413,7 +1413,7 @@ export default function Resume() {
                                 </div>
                                 <div>
                                   <span className="text-[9px] text-cyan-400 uppercase tracking-wider block font-bold mb-1">Polished STAR Output</span>
-                                  <p className="text-xs text-slate-200 bg-cyan-950/20 p-2.5 rounded border border-cyan-800/30">
+                                  <p className="text-xs text-slate-800 bg-cyan-950/20 p-2.5 rounded border border-cyan-800/30">
                                     "{rewrittenResult.rewritten}"
                                   </p>
                                 </div>
@@ -1446,7 +1446,7 @@ export default function Resume() {
                               placeholder="Paste your LinkedIn 'About' summary text..."
                               value={linkedinInput}
                               onChange={(e) => setLinkedinInput(e.target.value)}
-                              className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-2.5 text-slate-300 focus:outline-none focus:border-neon-cyan resize-none"
+                              className="w-full text-xs bg-dark-900 border border-dark-700 rounded-lg p-2.5 text-slate-700 focus:outline-none focus:border-neon-cyan resize-none"
                             />
                             <button
                               onClick={handleSocialConnect}
@@ -1460,7 +1460,7 @@ export default function Resume() {
                       ) : (
                         <div className="glass-card p-6 border-dark-700 space-y-4">
                           <div className="flex justify-between items-center border-b border-dark-800 pb-2">
-                            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest">LinkedIn Headline & Bio Optimizer</h3>
+                            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-widest">LinkedIn Headline & Bio Optimizer</h3>
                             <span className="text-xs font-black text-neon-purple">{result.linkedin_analysis?.linkedin_score || 0}% Score</span>
                           </div>
 
@@ -1468,7 +1468,7 @@ export default function Resume() {
                           <div className="space-y-2">
                             <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-bold">Suggested Headlines</span>
                             {result.linkedin_analysis?.headline_suggestions?.map((hl, idx) => (
-                              <div key={idx} className="bg-dark-900/40 p-3 rounded-lg border border-dark-800 text-xs text-slate-300 hover:border-dark-750 transition-colors">
+                              <div key={idx} className="bg-dark-900/40 p-3 rounded-lg border border-dark-800 text-xs text-slate-700 hover:border-dark-750 transition-colors">
                                 {hl}
                               </div>
                             ))}
