@@ -54,7 +54,7 @@ def _groq_keys() -> list:
     return keys
 
 
-def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:
+def run_gemini_prompt(prompt: str, system_instruction: str = None, temperature: float = 0.4) -> str:
     if not HAS_GEMINI:
         return None
     full_prompt = prompt
@@ -67,6 +67,7 @@ def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:
             model = genai.GenerativeModel(GEMINI_MODEL)
             response = model.generate_content(
                 full_prompt,
+                generation_config={"temperature": temperature},
                 request_options={"timeout": AI_TIMEOUT_SECONDS},
             )
             return response.text
@@ -75,7 +76,7 @@ def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:
     return None
 
 
-def run_groq_prompt(prompt: str, system_instruction: str = None) -> str:
+def run_groq_prompt(prompt: str, system_instruction: str = None, temperature: float = 0.2) -> str:
     if not HAS_OPENAI:
         return None
     messages = []
@@ -94,7 +95,7 @@ def run_groq_prompt(prompt: str, system_instruction: str = None) -> str:
             response = client.chat.completions.create(
                 model=GROQ_MODEL,
                 messages=messages,
-                temperature=0.2
+                temperature=temperature,
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -102,14 +103,19 @@ def run_groq_prompt(prompt: str, system_instruction: str = None) -> str:
     return None
 
 
-def run_ai_prompt(prompt: str, system_instruction: str = None, prefer: str = "groq") -> str:
-    """Runs a prompt against Groq or Gemini based on preference."""
+def run_ai_prompt(prompt: str, system_instruction: str = None, prefer: str = "groq", temperature: float = 0.2) -> str:
+    """Runs a prompt against Groq or Gemini based on preference.
+
+    `temperature` controls variety: keep it low (~0.2) for JSON-extraction tasks where
+    determinism is fine, and raise it (~0.9) for generative tasks like interview
+    questions so identical inputs don't keep producing the identical output.
+    """
     if prefer == "groq":
-        res = run_groq_prompt(prompt, system_instruction)
-        return res if res else run_gemini_prompt(prompt, system_instruction)
+        res = run_groq_prompt(prompt, system_instruction, temperature)
+        return res if res else run_gemini_prompt(prompt, system_instruction, temperature)
     else:
-        res = run_gemini_prompt(prompt, system_instruction)
-        return res if res else run_groq_prompt(prompt, system_instruction)
+        res = run_gemini_prompt(prompt, system_instruction, temperature)
+        return res if res else run_groq_prompt(prompt, system_instruction, temperature)
 
 
 def analyze_project_complexity(title: str, description: str, technologies: str) -> dict:

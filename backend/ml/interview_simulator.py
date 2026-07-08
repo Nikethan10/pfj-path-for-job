@@ -200,97 +200,160 @@ QUESTION_BANK = {
     ]
 }
 
+# Rotating focus areas for technical questions. Picking one at random each call — and
+# telling the model to build the question around it — guarantees variety even when the
+# role and history are identical (otherwise a low-temperature model repeats itself).
+TECHNICAL_FOCUS = [
+    "arrays and two-pointer techniques", "hash maps and frequency counting",
+    "sliding window problems", "binary search on answer",
+    "linked list manipulation", "stacks and queues", "recursion and backtracking",
+    "dynamic programming", "greedy algorithms", "trees and traversals",
+    "binary search trees", "heaps and priority queues", "graph BFS/DFS",
+    "shortest-path or union-find", "sorting and custom comparators",
+    "string parsing and pattern matching", "bit manipulation",
+    "system design and scalability", "concurrency and threading",
+    "database indexing and query optimization", "API design and caching",
+]
+
+# Map arbitrary target roles onto the closest technical question bank so roles that
+# aren't literal bank keys (e.g. "Cloud Architect") still get relevant fallback questions
+# instead of dropping to the tiny 3-question "General" set.
+def _resolve_bank_key(role: str) -> str:
+    if not role:
+        return "Software Engineer"
+    if role in QUESTION_BANK:
+        return role
+    r = role.lower()
+    if any(k in r for k in ["ml", "machine learning", "ai engineer", "deep learning"]):
+        return "ML Engineer"
+    if any(k in r for k in ["data scien", "data science"]):
+        return "Data Scientist"
+    if any(k in r for k in ["data analyst", "analytics", "business intelligence"]):
+        return "Data Analyst"
+    if any(k in r for k in ["full stack", "fullstack", "frontend", "front-end", "backend", "back-end", "web", "cloud", "devops", "site reliability", "platform"]):
+        return "Full Stack Developer"
+    if any(k in r for k in ["security", "cyber", "penetration", "soc"]):
+        return "Cyber Security Specialist"
+    if any(k in r for k in ["embedded", "firmware", "iot"]):
+        return "Embedded Systems Engineer"
+    if any(k in r for k in ["vlsi", "verilog", "asic", "fpga", "chip"]):
+        return "VLSI Design Engineer"
+    if any(k in r for k in ["mechanical", "thermal", "cad"]):
+        return "Mechanical Engineer"
+    if any(k in r for k in ["robot", "control"]):
+        return "Robotics Engineer"
+    return "Software Engineer"
+
+
 def generate_interview_question(role: str, previous_questions: list = None, interview_type: str = "technical") -> dict:
     """Generates a contextual interview question, avoiding previously asked questions."""
     if previous_questions is None:
         previous_questions = []
 
-    # 1. Attempt to query configured OpenAI / Groq / Gemini APIs using run_ai_prompt
+    # A random seed makes every call distinct even for identical role/history, so
+    # restarting a session no longer yields the exact same first question.
+    seed = random.randint(1000, 9999)
+
+    # 1. Attempt to query configured Groq / Gemini APIs using run_ai_prompt
     if interview_type == "technical":
-        prompt = f"""You are a technical interviewer at a top-tier tech firm. 
-Generate a technical/coding interview question for a candidate applying for the role of: {role}.
+        focus = random.choice(TECHNICAL_FOCUS)
+        prompt = f"""You are a technical interviewer at a top-tier tech firm.
+Generate ONE technical/coding interview question for a candidate applying for the role of: {role}.
 
-The question MUST be styled after algorithmic problem-solving tasks from LeetCode, HackerRank, or Codeforces. 
-It should ask the candidate to explain their solution approach, coding strategy, data structures, and time/space complexity for a specific coding problem (e.g., finding cycles in a linked list, resolving a dynamic programming equation, utilizing a sliding window, or designing a system).
+Build the question around this focus area: {focus}.
+Style it after algorithmic problem-solving tasks from LeetCode, HackerRank, or Codeforces.
+It should ask the candidate to explain their solution approach, data structures, and time/space complexity.
 
-Make sure the question is NOT in the following list of previously asked questions:
+Do NOT repeat any of these previously asked questions:
 {json.dumps(previous_questions)}
 
-Output MUST be a valid JSON object ONLY. Do not include any conversational text or markdown code blocks.
+Uniqueness token (ignore in your answer, it only ensures variety): {seed}
+
+Output MUST be a valid JSON object ONLY. No conversational text, no markdown code blocks.
 JSON Structure:
 {{
-  "question": "A detailed question text prompting the candidate to explain their approach to solve the problem, the data structures used, and the Big O time/space complexities.",
-  "expected_keywords": ["5-10 key technical keywords or complexity classes that must be present in a correct answer, e.g. 'O(N)', 'hash map', 'two pointers', 'dynamic programming', 'stack'"]
+  "question": "A detailed question prompting the candidate to explain their approach, data structures used, and Big O time/space complexity.",
+  "expected_keywords": ["5-10 key technical keywords or complexity classes, e.g. 'O(N)', 'hash map', 'two pointers', 'dynamic programming', 'stack'"]
 }}"""
     elif interview_type == "aptitude":
-        prompt = f"""You are an aptitude examiner. Generate a Quantitative Aptitude or Logical Reasoning question.
-Choose a specific sub-topic from the following list to construct the question:
-{json.dumps(APTITUDE_TOPICS)}
+        topic = random.choice(APTITUDE_TOPICS)
+        prompt = f"""You are an aptitude examiner. Generate ONE question on EXACTLY this sub-topic:
+{topic}
 
-Make sure the question is NOT in the following list of previously asked questions:
+Do NOT repeat any of these previously asked questions:
 {json.dumps(previous_questions)}
 
-Provide the question with all necessary details (and options/statement details if applicable). The question should ask the candidate to solve the problem and explain their step-by-step solving steps or reasoning.
-Output MUST be a valid JSON object ONLY. Do not include any conversational text or markdown code blocks.
+Uniqueness token (ignore in your answer, it only ensures variety): {seed}
+
+Provide the question with all necessary details (and options/statement details if applicable). Ask the candidate to solve it and explain their step-by-step reasoning.
+Output MUST be a valid JSON object ONLY. No conversational text, no markdown code blocks.
 JSON Structure:
 {{
-  "question": "A detailed aptitude or logical reasoning question text, asking the user to solve it and explain their step-by-step solution logic.",
-  "expected_keywords": ["3-5 key numerical answers, final values, or logical keywords that must be present in a correct explanation, e.g. '120', 'relative speed', 'south-west'"]
+  "question": "A detailed aptitude or logical reasoning question, asking the user to solve it and explain their step-by-step logic.",
+  "expected_keywords": ["3-5 key numerical answers, final values, or logical keywords, e.g. '120', 'relative speed', 'south-west'"]
 }}"""
-    else: # verbal
-        prompt = f"""You are a verbal ability and English grammar examiner. Generate a Verbal Ability or English test question.
-Choose a specific sub-topic from the following list to construct the question:
-{json.dumps(VERBAL_TOPICS)}
+    else:  # verbal
+        topic = random.choice(VERBAL_TOPICS)
+        prompt = f"""You are a verbal ability and English grammar examiner. Generate ONE question on EXACTLY this sub-topic:
+{topic}
 
-Make sure the question is NOT in the following list of previously asked questions:
+Do NOT repeat any of these previously asked questions:
 {json.dumps(previous_questions)}
 
-Provide the question (such as a vocabulary check, error correction, reading comprehension passage snippet, or para-jumble). Ask the candidate to solve it and explain their grammatical reasoning or choice selection.
-Output MUST be a valid JSON object ONLY. Do not include any conversational text or markdown code blocks.
+Uniqueness token (ignore in your answer, it only ensures variety): {seed}
+
+Provide the question (vocabulary check, error correction, reading comprehension snippet, or para-jumble). Ask the candidate to solve it and explain their grammatical reasoning.
+Output MUST be a valid JSON object ONLY. No conversational text, no markdown code blocks.
 JSON Structure:
 {{
-  "question": "A detailed verbal ability question text, asking the user to solve it and explain their choice or grammatical reasoning.",
-  "expected_keywords": ["3-5 key correct grammar options, synonyms, correct sentences, or grammatical terms that must be present in a correct answer"]
+  "question": "A detailed verbal ability question, asking the user to solve it and explain their choice or grammatical reasoning.",
+  "expected_keywords": ["3-5 correct grammar options, synonyms, correct sentences, or grammatical terms that must appear in a correct answer"]
 }}"""
 
     system_instruction = "You are a professional examiner. Return JSON only."
-    
+
     try:
-        ai_output = run_ai_prompt(prompt, system_instruction)
+        # High temperature = varied questions (the default 0.2 was near-deterministic,
+        # which is why restarting produced the identical question every time).
+        ai_output = run_ai_prompt(prompt, system_instruction, temperature=0.9)
         if ai_output:
             cleaned = clean_json_response(ai_output)
             res = json.loads(cleaned)
-            if "question" in res and "expected_keywords" in res:
+            q = res.get("question")
+            if q and res.get("expected_keywords") is not None and q not in previous_questions:
                 return {
-                    "question": res["question"],
-                    "expected_keywords": res["expected_keywords"]
+                    "question": q,
+                    "expected_keywords": res["expected_keywords"],
                 }
     except Exception as e:
         print(f"[AI Service] API question generation failed: {e}")
 
     # 2. Fall back to the curated static question bank
-    bank_key = "General"
     if interview_type == "aptitude":
         bank_key = "Aptitude"
     elif interview_type == "verbal":
         bank_key = "Verbal"
     else:
-        bank_key = role
-        
-    available_questions = QUESTION_BANK.get(bank_key, [])
+        bank_key = _resolve_bank_key(role)
+
+    available_questions = list(QUESTION_BANK.get(bank_key, []))
+    # For technical tracks, widen the pool with the General behavioural questions
+    # so there's more variety than a single role bank.
+    if interview_type == "technical":
+        available_questions += QUESTION_BANK.get("General", [])
     if not available_questions:
         available_questions = QUESTION_BANK.get("General", [])
-        
-    # Filter out questions that have already been asked
+
+    # Filter out questions that have already been asked this session
     filtered_questions = [q for q in available_questions if q["question"] not in previous_questions]
     if not filtered_questions:
         filtered_questions = available_questions
-        
+
     selected = random.choice(filtered_questions)
-    
+
     return {
         "question": selected["question"],
-        "expected_keywords": selected.get("keywords", selected.get("expected_keywords", []))
+        "expected_keywords": selected.get("keywords", selected.get("expected_keywords", [])),
     }
 
 def evaluate_interview_answer(question: str, user_answer: str, expected_keywords: list) -> dict:
