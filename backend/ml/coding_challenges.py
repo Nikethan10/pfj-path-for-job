@@ -2,6 +2,7 @@ import json
 import os
 import random
 from services.ai_service import run_ai_prompt, clean_json_response
+from utils.roles import resolve_canonical_role
 
 # Cache for dynamically generated challenges
 DYNAMIC_CHALLENGES = {}
@@ -14,30 +15,32 @@ def load_challenges():
     return []
 
 def get_challenges_for_role(role: str):
-    """Returns a curated list of challenges based on the user's role."""
+    """Returns a curated list of challenges based on the user's role.
+
+    Free-form roles (e.g. "Cloud Architect") are first mapped onto the closest
+    canonical role, so every user gets a relevant, non-empty catalog. Previously
+    unmapped roles matched nothing and the fallback compared 'General' against
+    lowercased strings — users saw an empty challenges tab.
+    """
     all_challenges = load_challenges()
-    if not role:
-        role = "Software Engineer"
-        
-    role = role.strip()
-    
-    # Filter based on roles. 
-    # A challenge is included if the roles list contains the target role (case-insensitive)
-    # or if the roles list is missing/empty (general challenge).
+    role = resolve_canonical_role((role or "").strip())
+
+    # A challenge is included if its roles list contains the resolved role
+    # (case-insensitive) or if the roles list is missing/empty (general challenge).
     filtered = []
     for c in all_challenges:
         challenge_roles = [r.lower() for r in c.get('roles', [])]
         if not challenge_roles or role.lower() in challenge_roles or 'general' in challenge_roles:
             filtered.append(c)
-    
-    # Fallback to general if no specific role challenges found
+
+    # Safety net: never return an empty catalog.
     if not filtered:
-        filtered = [c for c in all_challenges if not c.get('roles') or 'General' in [r.lower() for r in c.get('roles', [])]]
-    
+        filtered = all_challenges
+
     # Sort by difficulty: Easy -> Medium -> Hard
     diff_map = {"Easy": 0, "Medium": 1, "Hard": 2}
     filtered.sort(key=lambda x: diff_map.get(x.get("difficulty", "Easy"), 0))
-        
+
     return filtered
 
 def get_challenge_by_id(challenge_id: str):
@@ -71,6 +74,7 @@ def _static_dynamic_challenge(role: str) -> dict:
     all_static = load_challenges()
     if not all_static:
         return {}
+    role = resolve_canonical_role(role)
     role_challenges = [
         c for c in all_static
         if not c.get("roles") or role.lower() in [r.lower() for r in c.get("roles", [])]

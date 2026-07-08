@@ -219,30 +219,9 @@ TECHNICAL_FOCUS = [
 # aren't literal bank keys (e.g. "Cloud Architect") still get relevant fallback questions
 # instead of dropping to the tiny 3-question "General" set.
 def _resolve_bank_key(role: str) -> str:
-    if not role:
-        return "Software Engineer"
-    if role in QUESTION_BANK:
-        return role
-    r = role.lower()
-    if any(k in r for k in ["ml", "machine learning", "ai engineer", "deep learning"]):
-        return "ML Engineer"
-    if any(k in r for k in ["data scien", "data science"]):
-        return "Data Scientist"
-    if any(k in r for k in ["data analyst", "analytics", "business intelligence"]):
-        return "Data Analyst"
-    if any(k in r for k in ["full stack", "fullstack", "frontend", "front-end", "backend", "back-end", "web", "cloud", "devops", "site reliability", "platform"]):
-        return "Full Stack Developer"
-    if any(k in r for k in ["security", "cyber", "penetration", "soc"]):
-        return "Cyber Security Specialist"
-    if any(k in r for k in ["embedded", "firmware", "iot"]):
-        return "Embedded Systems Engineer"
-    if any(k in r for k in ["vlsi", "verilog", "asic", "fpga", "chip"]):
-        return "VLSI Design Engineer"
-    if any(k in r for k in ["mechanical", "thermal", "cad"]):
-        return "Mechanical Engineer"
-    if any(k in r for k in ["robot", "control"]):
-        return "Robotics Engineer"
-    return "Software Engineer"
+    from utils.roles import resolve_canonical_role
+    resolved = resolve_canonical_role(role)
+    return resolved if resolved in QUESTION_BANK else "Software Engineer"
 
 
 def generate_interview_question(role: str, previous_questions: list = None, interview_type: str = "technical") -> dict:

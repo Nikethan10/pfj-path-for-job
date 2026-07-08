@@ -37,6 +37,7 @@ export default function Challenges() {
   const [isRunning, setIsRunning] = useState(false);
   const [testResults, setTestResults] = useState(null);
   const [difficultyFilter, setDifficultyFilter] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
   const [generatingAI, setGeneratingAI] = useState(false);
 
   const handleGenerateAIChallenge = async () => {
@@ -78,9 +79,23 @@ export default function Challenges() {
     setLoading(false);
   };
 
-  const filteredChallenges = difficultyFilter === 'All' 
-    ? challenges 
-    : challenges.filter(c => c.difficulty === difficultyFilter);
+  const difficultyCounts = challenges.reduce(
+    (acc, c) => { acc[c.difficulty] = (acc[c.difficulty] || 0) + 1; return acc; },
+    {}
+  );
+  const completedCount = challenges.filter(c => c.completed).length;
+
+  const filteredChallenges = challenges.filter(c => {
+    if (difficultyFilter !== 'All' && c.difficulty !== difficultyFilter) return false;
+    if (searchTerm.trim()) {
+      const q = searchTerm.trim().toLowerCase();
+      return (
+        c.title.toLowerCase().includes(q) ||
+        (c.category || '').toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   const selectChallenge = async (id) => {
     setLoading(true);
@@ -186,9 +201,13 @@ export default function Challenges() {
         const total = activeChallenge.test_cases.length;
         setTestResults({ passes, total });
 
-        // Only record completion for a genuine full pass.
+        // Only record completion for a genuine full pass; refresh the catalog
+        // so the "Solved" badge shows when the user returns to it.
         if (total > 0 && passes === total) {
-          markChallengeComplete(activeChallenge.id);
+          try {
+            await markChallengeComplete(activeChallenge.id);
+            loadCatalog();
+          } catch { /* completion is best-effort */ }
         }
       }
     } catch (err) {
@@ -210,13 +229,16 @@ export default function Challenges() {
         <div className="flex-1 overflow-y-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
             <div>
-              <h1 className="section-title text-3xl mb-1"> Coding Challenges</h1>
+              <h1 className="section-title text-3xl mb-1">Coding Challenges</h1>
               <p className="text-slate-500">
                 Personalized practice for <span className="text-neon-cyan font-bold">{challenges[0]?.recommended_for || 'your career path'}</span>.
+                {completedCount > 0 && (
+                  <span className="ml-2 text-emerald-700 font-semibold">{completedCount}/{challenges.length} solved</span>
+                )}
               </p>
             </div>
-            
-            {/* AI Generator Button & Difficulty Tabs */}
+
+            {/* AI Generator, Search & Difficulty Tabs */}
             <div className="flex flex-wrap items-center gap-4">
               <button
                 onClick={handleGenerateAIChallenge}
@@ -229,24 +251,38 @@ export default function Challenges() {
                     <span>Generating Challenge...</span>
                   </>
                 ) : (
-                  <>
-                    <span> AI Challenge Generator</span>
-                  </>
+                  <span>AI Challenge Generator</span>
                 )}
               </button>
+
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" /></svg>
+                </span>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search title or category..."
+                  className="pl-9 pr-3 py-2 rounded-xl border border-dark-700 bg-white text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-neon-cyan/50 w-56"
+                />
+              </div>
 
               <div className="flex bg-slate-100 p-1 rounded-xl border border-dark-700">
                 {['All', 'Easy', 'Medium', 'Hard'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setDifficultyFilter(tab)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      difficultyFilter === tab 
-                        ? 'bg-white text-neon-cyan shadow-sm border border-neon-cyan/20' 
+                    className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                      difficultyFilter === tab
+                        ? 'bg-white text-neon-cyan shadow-sm border border-neon-cyan/20'
                         : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
                     }`}
                   >
                     {tab}
+                    <span className="text-[10px] font-bold text-slate-400">
+                      {tab === 'All' ? challenges.length : (difficultyCounts[tab] || 0)}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -273,7 +309,7 @@ export default function Challenges() {
                       <span className="text-[10px] uppercase tracking-widest text-neon-purple font-bold">Recommended for {c.recommended_for}</span>
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-4 flex items-center gap-2">
                       <span className={`badge ${
                         c.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-700' :
                         c.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-700' :
@@ -281,6 +317,12 @@ export default function Challenges() {
                       }`}>
                         {c.difficulty}
                       </span>
+                      {c.completed && (
+                        <span className="badge bg-emerald-600/10 text-emerald-700 border border-emerald-500/30 flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                          Solved
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-sm text-slate-500 line-clamp-3 mb-4 flex-1">{c.description}</p>
@@ -298,7 +340,7 @@ export default function Challenges() {
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
               <span className="mb-4 text-slate-300"><svg className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" /></svg></span>
-              <p>No {difficultyFilter.toLowerCase()} challenges found.</p>
+              <p>{searchTerm.trim() ? `No challenges match "${searchTerm.trim()}".` : `No ${difficultyFilter.toLowerCase()} challenges found.`}</p>
             </div>
           )}
         </div>

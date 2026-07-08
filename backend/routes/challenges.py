@@ -15,6 +15,13 @@ def get_challenges(
 ):
     role = get_target_role(db, uid)
 
+    # Which challenges has this user already completed?
+    completed_ids = {
+        doc.id
+        for doc in db.collection("users").document(uid).collection("challenges").get()
+        if (doc.to_dict() or {}).get("status") == "completed"
+    }
+
     # We strip out the test cases and initial code so we just return the catalog
     challenges = get_challenges_for_role(role)
     catalog = [
@@ -24,7 +31,8 @@ def get_challenges(
             "difficulty": c["difficulty"],
             "category": c["category"],
             "description": c["description"],
-            "recommended_for": role
+            "recommended_for": role,
+            "completed": c["id"] in completed_ids,
         } for c in challenges
     ]
     return catalog
