@@ -102,7 +102,7 @@ export default function Projects() {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
           {/* Left Column: Title & Target Path */}
           <div className="lg:col-span-2 space-y-3 text-left">
-            <h1 className="section-title text-4xl mb-1 font-extrabold tracking-tight"> Career Labs</h1>
+            <h1 className="section-title text-4xl mb-1 font-extrabold tracking-tight">Project Labs</h1>
             <p className="text-slate-600 text-sm max-w-xl">
               Construct your engineering portfolio with job-aligned projects tailored directly to your career aims.
             </p>
@@ -249,11 +249,16 @@ export default function Projects() {
                     ) : null}
                   </div>
 
-                  {/* Project Name */}
+                  {/* Project Name + one-line tagline */}
                   <div className="mb-6">
                     <h3 className="font-bold text-base text-slate-800 tracking-tight group-hover:text-neon-cyan transition-colors line-clamp-2">
                       {p.project_name}
                     </h3>
+                    {p.description && (
+                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
+                        {p.description}
+                      </p>
+                    )}
                   </div>
 
                   {/* Footer actions */}
@@ -342,30 +347,60 @@ export default function Projects() {
 
 
 
-                  {/* Description */}
+                  {/* About */}
                   <div className="mb-6">
-                    <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Project Brief & Objectives</h3>
-                    <p className="text-sm text-slate-700 leading-relaxed font-normal bg-slate-50 border border-dark-700 p-4 rounded-2xl">
-                      {selectedProject?.description}
+                    <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">About this project</h3>
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                      {selectedProject?.overview || selectedProject?.description}
                     </p>
                   </div>
 
-                  {/* Required Skills */}
+                  {/* What you'll build */}
+                  {selectedProject?.features?.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2.5">What you'll build</h3>
+                      <ul className="space-y-2">
+                        {selectedProject.features.map((f, i) => (
+                          <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-neon-cyan shrink-0" />
+                            <span className="leading-relaxed">{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Skills */}
                   <div className="mb-6">
-                    <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2.5">Required Skill Modules</h3>
+                    <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2.5">Skills you'll showcase</h3>
                     <div className="flex flex-wrap gap-2">
                       {(selectedProject?.skills || []).map(s => (
-                        <span key={s} className="text-xs bg-slate-100 border border-dark-700 px-3 py-1 rounded-xl text-slate-700 hover:border-neon-cyan/40 hover:bg-neon-cyan/5 transition-all">
-                           {s}
+                        <span key={s} className="text-xs bg-slate-100 border border-dark-700 px-3 py-1 rounded-xl text-slate-700">
+                          {s}
                         </span>
                       ))}
                     </div>
                   </div>
 
+                  {/* Resume impact */}
+                  {selectedProject?.outcomes?.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2.5">Resume impact</h3>
+                      <div className="space-y-2">
+                        {selectedProject.outcomes.map((o, i) => (
+                          <div key={i} className="flex items-start gap-2.5 text-sm text-emerald-800 bg-emerald-500/5 border border-emerald-500/15 rounded-2xl p-3 leading-relaxed">
+                            <svg className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>{o}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Career Alignment / Evaluation Tips */}
                   {selectedProject?.explanation && (
                     <div className="border-t border-dark-700 pt-5">
-                      <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3">Portfolio Assessment & Alignment</h3>
+                      <h3 className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3">Why this fits your path</h3>
                       <div className="space-y-2.5">
                         {selectedProject.explanation.split(' · ').map((part, idx) => {
                           // Backend tags each clause with a plain-text token; map it to a

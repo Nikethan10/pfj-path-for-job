@@ -105,47 +105,26 @@ def seed_skills(refresh: bool = False):
         })
     print(f"Seeded {len(SKILL_CATALOG)} skills across 10 career roles.")
 
-def seed_projects():
+def seed_projects(refresh: bool = False):
+    from data.projects_catalog import PROJECTS
+
     projects_ref = db.collection("projects")
-    
-    docs = list(projects_ref.limit(1).stream())
-    if docs:
-        print("Projects collection already has data. Skipping projects seed.")
+
+    existing = list(projects_ref.limit(1).stream())
+    if existing and not refresh:
+        print("Projects collection already has data. Run with --refresh-projects to replace it.")
         return
 
-    projects_data = [
-        {
-            "project_name": "E-Commerce Microservices",
-            "domain": "Web Development",
-            "difficulty": "Advanced",
-            "description": "Build a scalable e-commerce platform using microservices architecture with Node.js, Docker, and React.",
-            "skills": ["Node.js", "React", "Docker", "Microservices"],
-            "explanation": "Target Career Track · This project directly aligns with Full Stack and Backend Engineering roles. · Demonstrates ability to handle complex system architecture and modern deployment practices.",
-            "match_score": 0.95
-        },
-        {
-            "project_name": "Data Analytics Dashboard",
-            "domain": "Data Science",
-            "difficulty": "Intermediate",
-            "description": "Create an interactive dashboard that analyzes and visualizes large datasets using Python and React.",
-            "skills": ["Python", "React", "Data Visualization", "SQL"],
-            "explanation": "Target Career Track · Excellent for Data Engineering or Full Stack paths. · Shows practical ability to handle data pipelines and frontend visualization.",
-            "match_score": 0.85
-        },
-        {
-            "project_name": "To-Do List API",
-            "domain": "Backend Development",
-            "difficulty": "Beginner",
-            "description": "A simple RESTful API for managing tasks, built with Python (FastAPI) and SQLite.",
-            "skills": ["Python", "API Design", "SQL"],
-            "explanation": "Great entry-level project to demonstrate fundamental API concepts and basic database operations.",
-            "match_score": 0.60
-        }
-    ]
+    if existing and refresh:
+        deleted = 0
+        for doc in projects_ref.stream():
+            doc.reference.delete()
+            deleted += 1
+        print(f"Deleted {deleted} old project docs.")
 
-    for proj in projects_data:
+    for proj in PROJECTS:
         projects_ref.add(proj)
-    print(f"Seeded {len(projects_data)} projects.")
+    print(f"Seeded {len(PROJECTS)} resume-grade projects.")
 
 def seed_jobs():
     jobs_ref = db.collection("jobs")
@@ -197,6 +176,6 @@ def seed_jobs():
 if __name__ == "__main__":
     print("Starting Firestore Seeding...")
     seed_skills(refresh="--refresh-skills" in sys.argv)
-    seed_projects()
+    seed_projects(refresh="--refresh-projects" in sys.argv)
     seed_jobs()
     print("Seeding Complete.")

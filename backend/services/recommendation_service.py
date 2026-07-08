@@ -49,6 +49,10 @@ def get_recommended_projects(db, uid: str) -> list:
             "difficulty": p_data.get("difficulty", ""),
             "description": p_data.get("description", ""),
             "skills": p_data.get("skills", []),
+            # Rich detail fields for the project brief (optional; older docs omit them).
+            "overview": p_data.get("overview", ""),
+            "features": p_data.get("features", []),
+            "outcomes": p_data.get("outcomes", []),
         })
 
     # 5. Call recommend_projects
