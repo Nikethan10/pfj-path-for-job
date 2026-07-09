@@ -268,7 +268,7 @@ def _fallback_quiz(skill_name: str) -> dict:
     return {"questions": questions}
 
 
-def generate_skill_quiz(skill_name: str) -> dict:
+def generate_skill_quiz(skill_name: str, avoid: list = None) -> dict:
     """Generate a FRESH 3-question multiple-choice quiz for `skill_name` via the AI
     providers on every call.
 
@@ -276,9 +276,23 @@ def generate_skill_quiz(skill_name: str) -> dict:
     same skill produces different questions each time, so retaking an assessment never
     repeats the identical set (the previous version cached one quiz per skill in Firebase,
     which is why the same questions kept coming back).
+
+    `avoid` is a list of the user's recently-served question texts; the model is told not
+    to repeat or paraphrase them, and any exact match is filtered out, so questions don't
+    recur across a user's last several attempts.
     """
     seed = random.randint(1000, 9999)
     angles = random.sample(_QUIZ_ANGLES, 3)
+    avoid = [a for a in (avoid or []) if a]
+    avoid_norm = {re.sub(r"\s+", " ", a.strip().lower()) for a in avoid}
+
+    avoid_block = ""
+    if avoid:
+        recent = "\n".join(f"- {a}" for a in avoid[-12:])
+        avoid_block = (
+            "\nDo NOT repeat or paraphrase any of these recently-asked questions:\n"
+            f"{recent}\n"
+        )
 
     prompt = f"""Generate a multiple-choice quiz with EXACTLY 3 challenging, distinct questions
 that test real understanding of '{skill_name}'.
@@ -292,7 +306,7 @@ Rules:
 - Write practical, non-obvious questions — avoid tired textbook clichés.
 - Vary which option is correct across the three questions.
 - Each question must have exactly 4 distinct, plausible options.
-
+{avoid_block}
 Uniqueness token (ignore in your answer, it only forces variety): {seed}
 
 Return ONLY a valid JSON array of exactly 3 objects, each with:
@@ -309,6 +323,11 @@ No markdown, no commentary — just the JSON array."""
             break
         try:
             questions = _clean_quiz_questions(json.loads(clean_json_response(response)))
+            # Hard filter: drop any question that exactly matches a recently-served one.
+            fresh = [q for q in questions if re.sub(r"\s+", " ", q["question"].strip().lower()) not in avoid_norm]
+            if len(fresh) >= 3:
+                return {"questions": fresh[:3]}
+            # If avoidance left us short, accept the unfiltered set rather than fail.
             if len(questions) >= 3:
                 return {"questions": questions[:3]}
         except Exception as e:

@@ -18,10 +18,22 @@ def get_question(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
-    target_role = get_target_role(db, uid)
+    from services.question_history import get_recent, record
 
-    # Pass previous_questions and interview_type to generate custom questions
-    return generate_interview_question(target_role, data.previous_questions, data.interview_type)
+    target_role = get_target_role(db, uid)
+    context = f"interview:{data.interview_type}:{target_role}"
+
+    # Avoid both this session's questions (from the client) and the user's recently-served
+    # questions from PAST sessions (server memory), so nothing repeats across attempts.
+    avoid = list(dict.fromkeys([*(data.previous_questions or []), *get_recent(db, uid, context)]))
+
+    result = generate_interview_question(target_role, avoid, data.interview_type)
+
+    # Remember what we served so it won't come back in the next few attempts.
+    if result.get("question"):
+        record(db, uid, context, result["question"])
+
+    return result
 
 
 @router.post("/evaluate")

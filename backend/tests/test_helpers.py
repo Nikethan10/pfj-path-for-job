@@ -68,6 +68,56 @@ def test_resolve_canonical_role():
     assert resolve_canonical_role("Astronaut") == "Software Engineer"
 
 
+class _FakeNode:
+    """Minimal Firestore-like node backed by a shared dict, supporting the
+    collection().document().collection().document() chain plus get()/set()."""
+    def __init__(self, store, path=""):
+        self.store = store
+        self.path = path
+
+    def collection(self, name):
+        return _FakeNode(self.store, f"{self.path}/{name}")
+
+    def document(self, name):
+        return _FakeNode(self.store, f"{self.path}/{name}")
+
+    def get(self):
+        data = self.store.get(self.path)
+        node = self
+        class _Snap:
+            exists = data is not None
+            def to_dict(self_inner):
+                return data
+        return _Snap()
+
+    def set(self, data):
+        self.store[self.path] = data
+
+
+def test_question_history_dedup_and_window():
+    from services import question_history as qh
+
+    store = {}
+    db = _FakeNode(store)
+    ctx = "quiz:python"
+
+    assert qh.get_recent(db, "u1", ctx) == []
+
+    qh.record(db, "u1", ctx, ["Q one", "Q two"])
+    qh.record(db, "u1", ctx, ["Q two", "Q three"])  # "Q two" is a duplicate
+    recent = qh.get_recent(db, "u1", ctx)
+    # de-duplicated, most-recent kept, order preserved
+    assert recent == ["Q one", "Q two", "Q three"]
+
+    # case/whitespace-insensitive de-duplication
+    qh.record(db, "u1", ctx, ["  q ONE  "])
+    assert qh.get_recent(db, "u1", ctx).count("Q one") + qh.get_recent(db, "u1", ctx).count("  q ONE  ") == 1
+
+    # window is capped at KEEP
+    qh.record(db, "u1", ctx, [f"filler {i}" for i in range(qh.KEEP + 20)])
+    assert len(qh.get_recent(db, "u1", ctx)) == qh.KEEP
+
+
 def test_challenge_repository_is_valid():
     """Every challenge must satisfy the dual-language runner's constraints."""
     import ast, json, os, re

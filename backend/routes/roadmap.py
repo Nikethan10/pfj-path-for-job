@@ -57,7 +57,14 @@ def get_quiz(
 ):
     """Generate a quiz. The answer key is stored server-side and never sent to the client."""
     from services.ai_service import generate_skill_quiz
-    quiz = generate_skill_quiz(data.skill_name)
+    from services.question_history import get_recent, record
+
+    context = f"quiz:{data.skill_name.strip().lower()}"
+    # Steer generation away from questions this user saw in their last few attempts.
+    quiz = generate_skill_quiz(data.skill_name, avoid=get_recent(db, uid, context))
+
+    # Remember the questions we just served for this skill.
+    record(db, uid, context, [q.get("question") for q in quiz["questions"]])
 
     correct_indices = [q["correct_idx"] for q in quiz["questions"]]
     session_id = secrets.token_urlsafe(24)
