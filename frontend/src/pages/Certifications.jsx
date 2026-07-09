@@ -26,7 +26,9 @@ export default function Certifications() {
         ]);
         setProfile(profileRes.data);
         setRoles(rolesRes.data);
-        if (profileRes.data?.target_role) {
+        // Only adopt the profile's target role if we actually have a catalog for it,
+        // otherwise the page would render empty for non-standard roles.
+        if (profileRes.data?.target_role && CERT_DATABASE[profileRes.data.target_role]) {
           setSelectedRole(profileRes.data.target_role);
         }
       } catch { }
@@ -201,7 +203,7 @@ export default function Certifications() {
             value={selectedRole} 
             onChange={e => setSelectedRole(e.target.value)}
           >
-            {roles.map(r => <option key={r} value={r}>{r}</option>)}
+            {Object.keys(CERT_DATABASE).map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
 
