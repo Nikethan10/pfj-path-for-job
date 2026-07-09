@@ -1,9 +1,8 @@
 import json
 import re
+import random
 import logging
 from config.settings import get_settings
-from database.firebase_db import get_rtdb
-import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +29,6 @@ def clean_json_response(text: str) -> str:
         return match.group(1).strip()
     return text
 
-
-import random
 
 # Per-call timeout (seconds). Without this a slow provider hangs the request until the
 # frontend's 30s axios timeout fires, which shows up to users as an infinite spinner.
@@ -199,60 +196,123 @@ def analyze_linkedin_profile(linkedin_text: str) -> dict:
     return {"linkedin_score": 50, "headline_suggestions": [], "about_suggestions": "", "experience_tips": [], "project_tips": [], "overall_suggestions": []}
 
 
-def _get_cache_key(skill_name: str) -> str:
-    """Generate a consistent safe key for Firebase Realtime Database."""
-    return hashlib.md5(skill_name.strip().lower().encode()).hexdigest()
+# Angles the quiz can probe. Each generation samples a few at random so the same skill
+# doesn't keep producing the same questions.
+_QUIZ_ANGLES = [
+    "core concepts and terminology",
+    "practical, real-world application",
+    "common mistakes, pitfalls, and debugging",
+    "best practices and design trade-offs",
+    "performance, scaling, or optimization",
+    "syntax, APIs, or tool-specific behavior",
+    "how it compares with common alternatives",
+    "advanced or edge-case scenarios",
+]
+
+
+def _clean_quiz_questions(data) -> list:
+    """Keep only well-formed questions: text + exactly 4 options + a valid correct index."""
+    if not isinstance(data, list):
+        return []
+    out = []
+    for q in data:
+        if not isinstance(q, dict):
+            continue
+        text = q.get("question")
+        options = q.get("options")
+        idx = q.get("correct_idx")
+        if not text or not isinstance(options, list) or len(options) < 4:
+            continue
+        options = [str(o) for o in options[:4]]
+        try:
+            idx = int(idx)
+        except (TypeError, ValueError):
+            continue
+        if not 0 <= idx <= 3:
+            continue
+        out.append({"question": str(text), "options": options, "correct_idx": idx})
+    return out
+
+
+def _fallback_quiz(skill_name: str) -> dict:
+    """Small, randomized 3-question quiz used only when the AI providers are unavailable.
+
+    Answer positions are shuffled each call so it is never the exact same quiz twice.
+    """
+    templates = [
+        (f"What is the most effective way to genuinely build proficiency in {skill_name}?",
+         "Build hands-on projects and study real-world examples",
+         ["Memorize definitions without ever practicing",
+          "Avoid documentation and community resources",
+          "Only watch videos without writing anything"]),
+        (f"When working with {skill_name}, which habit do professionals recommend?",
+         "Follow established conventions and read the official documentation",
+         ["Ignore all error messages",
+          "Never test or review your work",
+          "Copy code without understanding it"]),
+        (f"Which approach best deepens your understanding of {skill_name}?",
+         "Explain concepts to others and seek feedback on your work",
+         ["Work in isolation and avoid all feedback",
+          "Skip fundamentals and only chase shortcuts",
+          "Assume the first solution is always optimal"]),
+    ]
+    questions = []
+    for stem, correct, distractors in templates:
+        options = [correct] + distractors
+        random.shuffle(options)
+        questions.append({
+            "question": stem,
+            "options": options,
+            "correct_idx": options.index(correct),
+        })
+    return {"questions": questions}
+
 
 def generate_skill_quiz(skill_name: str) -> dict:
-    """
-    Generates a 3-question multiple-choice quiz using Groq.
-    Caches questions in Firebase Realtime Database to reduce costs.
-    """
-    import random
-    
-    # 1. Check Cache
-    try:
-        ref = get_rtdb().child('cached_quizzes').child(_get_cache_key(skill_name))
-        cached_data = ref.get()
-        if cached_data and "questions" in cached_data:
-            logger.info(f"Quiz cache hit for '{skill_name}'")
-            return cached_data
-    except Exception as e:
-        logger.error(f"Error reading cache for '{skill_name}': {e}")
+    """Generate a FRESH 3-question multiple-choice quiz for `skill_name` via the AI
+    providers on every call.
 
-    # 2. Generate via Groq (Fast & Low Cost)
-    prompt = f"""
-Generate a multiple-choice quiz with exactly 3 challenging questions to assess a developer's knowledge in '{skill_name}'.
-Return ONLY a valid JSON list of objects, where each object has:
+    No caching and a high temperature + random focus angles + a per-call nonce mean the
+    same skill produces different questions each time, so retaking an assessment never
+    repeats the identical set (the previous version cached one quiz per skill in Firebase,
+    which is why the same questions kept coming back).
+    """
+    seed = random.randint(1000, 9999)
+    angles = random.sample(_QUIZ_ANGLES, 3)
+
+    prompt = f"""Generate a multiple-choice quiz with EXACTLY 3 challenging, distinct questions
+that test real understanding of '{skill_name}'.
+
+Cover three DIFFERENT angles, one per question:
+1. {angles[0]}
+2. {angles[1]}
+3. {angles[2]}
+
+Rules:
+- Write practical, non-obvious questions — avoid tired textbook clichés.
+- Vary which option is correct across the three questions.
+- Each question must have exactly 4 distinct, plausible options.
+
+Uniqueness token (ignore in your answer, it only forces variety): {seed}
+
+Return ONLY a valid JSON array of exactly 3 objects, each with:
 - "question": string
-- "options": list of 4 strings
-- "correct_idx": integer (0 to 3) representing the index of the correct answer in the options list.
-"""
+- "options": array of exactly 4 strings
+- "correct_idx": integer 0-3 (index of the correct option)
+No markdown, no commentary — just the JSON array."""
     system_instruction = "You are an expert technical interviewer. Return ONLY valid JSON matching the schema."
-    
-    response = run_ai_prompt(prompt, system_instruction, prefer="groq")
-    
-    if response:
-        try:
-            cleaned = clean_json_response(response)
-            data = json.loads(cleaned)
-            if isinstance(data, list) and len(data) >= 3:
-                result = {"questions": data[:3]}
-                
-                # 3. Save to Cache
-                try:
-                    get_rtdb().child('cached_quizzes').child(_get_cache_key(skill_name)).set(result)
-                    logger.info(f"Quiz cache saved for '{skill_name}'")
-                except Exception as cache_err:
-                    logger.error(f"Failed to cache quiz: {cache_err}")
-                    
-                return result
-        except Exception as e:
-            logger.error(f"Failed to parse AI quiz response: {e}")
 
-    # Fallback to a single mock question if AI fails
-    return {"questions": [{
-        "question": f"What is a core feature of {skill_name}?",
-        "options": ["Scalability", "Latency", "Memory Leak", "Timeout"],
-        "correct_idx": 0
-    }]}
+    # High temperature = varied questions; one retry in case the first response is malformed.
+    for attempt in range(2):
+        response = run_ai_prompt(prompt, system_instruction, prefer="groq", temperature=0.9)
+        if not response:
+            break
+        try:
+            questions = _clean_quiz_questions(json.loads(clean_json_response(response)))
+            if len(questions) >= 3:
+                return {"questions": questions[:3]}
+        except Exception as e:
+            logger.warning(f"Quiz parse failed (attempt {attempt + 1}) for '{skill_name}': {e}")
+
+    logger.warning(f"AI quiz generation unavailable for '{skill_name}'; using randomized fallback.")
+    return _fallback_quiz(skill_name)
