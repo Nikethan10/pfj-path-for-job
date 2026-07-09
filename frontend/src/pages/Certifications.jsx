@@ -74,16 +74,111 @@ export default function Certifications() {
   // Fetch current database items matching target selected trajectory
   const activeCertifications = CERT_DATABASE[selectedRole] || [];
 
-  // Filter based on Free vs Paid exam types
-  const filteredCerts = activeCertifications.filter(cert => {
-    if (priceFilter === 'All') return true;
-    return cert.price === priceFilter;
-  });
+  // Split into Free vs Paid buckets; the pricing filter chooses which sections show.
+  const freeCerts = activeCertifications.filter(c => c.price === 'Free');
+  const paidCerts = activeCertifications.filter(c => c.price === 'Paid');
+  const showFree = priceFilter !== 'Paid';
+  const showPaid = priceFilter !== 'Free';
 
-  // Calculate metrics matching this specific trajectory
-  const totalInSelected = activeCertifications.length;
-  const completedInSelected = activeCertifications.filter(c => progress[c.id] === 'Completed').length;
-  const inProgressInSelected = activeCertifications.filter(c => progress[c.id] === 'In Progress').length;
+  // Ordered list of currently-visible certs (drives modal prev/next navigation).
+  const filteredCerts = [
+    ...(showFree ? freeCerts : []),
+    ...(showPaid ? paidCerts : []),
+  ];
+
+  // One card. Kept as a helper so the Free and Paid sections render identically.
+  const renderCertCard = (cert, index) => {
+    const status = progress[cert.id] || 'Not Started';
+    return (
+      <motion.div
+        key={cert.id}
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: Math.min(index * 0.04, 0.3) }}
+        onClick={() => setSelectedCert(cert)}
+        className={`glass-card p-6 shadow-xs flex flex-col justify-between relative overflow-hidden cursor-pointer hover:border-[#166534]/35 hover:-translate-y-0.5 transition-all duration-300 ${
+          status === 'Completed' ? 'border-[#166534]/30 bg-green-50/10' : ''
+        }`}
+      >
+        <div>
+          {/* Header tags */}
+          <div className="flex justify-between items-start gap-4 mb-4">
+            <div>
+              <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">{cert.provider}</span>
+              <h3 className="text-base font-extrabold text-slate-800 leading-snug mt-0.5">{cert.name}</h3>
+            </div>
+
+            {/* Price / type badge */}
+            <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md border shrink-0 ${
+              cert.price === 'Free'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                : 'bg-amber-50 border-amber-200 text-amber-700'
+            }`}>
+              {cert.type}
+            </span>
+          </div>
+
+          {/* Meta specifics */}
+          <div className="flex gap-4 mb-4 text-[10px] text-slate-500 font-bold uppercase">
+            <div className="flex items-center gap-1.5">
+              <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              {cert.duration}
+            </div>
+            <div className="flex items-center gap-1 border-l border-dark-700 pl-4">
+              {cert.difficulty}
+            </div>
+            <div className="flex items-center gap-1 border-l border-dark-700 pl-4 text-purple-700">
+              {cert.weight}
+            </div>
+          </div>
+
+          {/* Course description */}
+          <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-2">{cert.desc}</p>
+
+          {/* Associated Skills */}
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {cert.skills.slice(0, 3).map(skill => (
+              <span key={skill} className="text-[9px] font-mono font-bold bg-[#faf8f5] text-slate-600 border border-dark-700 px-2 py-0.5 rounded">
+                {skill}
+              </span>
+            ))}
+            {cert.skills.length > 3 && (
+              <span className="text-[9px] font-mono font-bold text-slate-400 px-1 py-0.5">+{cert.skills.length - 3} more</span>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-dark-700 pt-4 flex justify-between items-center gap-3">
+          {status === 'Completed' && (
+            <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              Completed
+            </span>
+          )}
+          <span className="text-[10px] tracking-widest text-[#166534] font-black ml-auto">
+            VIEW DETAILS →
+          </span>
+        </div>
+      </motion.div>
+    );
+  };
+
+  // Section header with an accent bar and a count pill.
+  const SectionHeader = ({ title, subtitle, count, accent }) => (
+    <div className="flex items-center gap-3 mb-5">
+      <div className={`w-1 h-8 rounded-full ${accent === 'green' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+      <div>
+        <h2 className="text-lg font-extrabold text-slate-800 tracking-tight">{title}</h2>
+        <p className="text-xs text-slate-500">{subtitle}</p>
+      </div>
+      <span className={`ml-auto text-xs font-bold px-2.5 py-1 rounded-full border ${
+        accent === 'green' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+      }`}>
+        {count} {count === 1 ? 'course' : 'courses'}
+      </span>
+    </div>
+  );
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-8 text-left relative">
@@ -114,107 +209,71 @@ export default function Certifications() {
         <div className="space-y-1.5 shrink-0">
           <label className="text-[9px] text-slate-400 font-black tracking-widest uppercase block mb-1">Pricing Filter</label>
           <div className="flex bg-slate-100 border border-dark-700 rounded-xl p-1 shrink-0">
-            {['All', 'Free', 'Paid'].map(filter => (
+            {[
+              { key: 'All', label: 'All', count: activeCertifications.length },
+              { key: 'Free', label: 'Free', count: freeCerts.length },
+              { key: 'Paid', label: 'Paid', count: paidCerts.length },
+            ].map(({ key, label, count }) => (
               <button
-                key={filter}
-                onClick={() => setPriceFilter(filter)}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
-                  priceFilter === filter
+                key={key}
+                onClick={() => setPriceFilter(key)}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${
+                  priceFilter === key
                     ? 'bg-white text-slate-800 shadow-xs border border-dark-700'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                {filter === 'All' ? 'All Credentials' : filter}
+                {label}
+                <span className="text-[10px] font-bold text-slate-400">{count}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Recommended Certifications Grid */}
+      {/* Free / Paid split sections */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`${selectedRole}-${priceFilter}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          className="space-y-12"
         >
           {filteredCerts.length === 0 ? (
-            <div className="lg:col-span-2 glass-card p-12 text-center text-slate-400 text-sm">
-              No certifications match your selected filters. Try switching filters to Free/Paid options.
+            <div className="glass-card p-12 text-center text-slate-400 text-sm">
+              No certifications available for this trajectory yet.
             </div>
           ) : (
-            filteredCerts.map((cert, index) => {
-              const status = progress[cert.id] || 'Not Started';
-              return (
-                <motion.div
-                  key={cert.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  onClick={() => setSelectedCert(cert)}
-                  className={`glass-card p-6 shadow-xs flex flex-col justify-between relative overflow-hidden cursor-pointer hover:border-[#166534]/35 hover:-translate-y-0.5 transition-all duration-300 ${
-                    status === 'Completed' ? 'border-[#166534]/30 bg-green-50/10' : ''
-                  }`}
-                >
-                  <div>
-                    {/* Header tags */}
-                    <div className="flex justify-between items-start gap-4 mb-4">
-                      <div>
-                        <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">{cert.provider}</span>
-                        <h3 className="text-base font-extrabold text-slate-800 leading-snug mt-0.5">{cert.name}</h3>
-                      </div>
-                      
-                      {/* Price status badges */}
-                      <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md border shrink-0 ${
-                        cert.price === 'Free'
-                          ? 'bg-green-50 border-green-200 text-green-700'
-                          : 'bg-yellow-50 border-yellow-250 text-yellow-755'
-                      }`}>
-                        {cert.type}
-                      </span>
-                    </div>
-
-                    {/* Meta specifics */}
-                    <div className="flex gap-4 mb-4 text-[10px] text-slate-500 font-bold uppercase">
-                      <div className="flex items-center gap-1">
-                        <span>⌛</span> {cert.duration}
-                      </div>
-                      <div className="flex items-center gap-1 border-l border-dark-700 pl-4">
-                         {cert.difficulty}
-                      </div>
-                      <div className="flex items-center gap-1 border-l border-dark-700 pl-4 text-purple-650">
-                         {cert.weight}
-                      </div>
-                    </div>
-
-                    {/* Course description */}
-                    <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-2">{cert.desc}</p>
-
-                    {/* Associated Skills */}
-                    <div className="flex flex-wrap gap-1.5 mb-6">
-                      {cert.skills.slice(0, 3).map(skill => (
-                        <span key={skill} className="text-[9px] font-mono font-bold bg-[#faf8f5] text-slate-650 border border-dark-700 px-2 py-0.5 rounded">
-                          {skill}
-                        </span>
-                      ))}
-                      {cert.skills.length > 3 && (
-                        <span className="text-[9px] font-mono font-bold text-slate-400 px-1 py-0.5">+{cert.skills.length - 3} more</span>
-                      )}
-                    </div>
+            <>
+              {showFree && freeCerts.length > 0 && (
+                <section>
+                  <SectionHeader
+                    title="Free Courses & Credentials"
+                    subtitle="No-cost, high-quality learning from top universities and companies"
+                    count={freeCerts.length}
+                    accent="green"
+                  />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {freeCerts.map(renderCertCard)}
                   </div>
+                </section>
+              )}
 
-                  {/* Operational controls footer */}
-                  <div className="border-t border-dark-700 pt-4 flex justify-between items-center gap-3" onClick={e => e.stopPropagation()}>
-                    <span className="text-[10px] tracking-widest text-[#166534] font-black hover:underline cursor-pointer">
-                      VIEW DETAILS →
-                    </span>
+              {showPaid && paidCerts.length > 0 && (
+                <section>
+                  <SectionHeader
+                    title="Paid Professional Certifications"
+                    subtitle="Industry-recognized credentials and proctored exams worth the investment"
+                    count={paidCerts.length}
+                    accent="amber"
+                  />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {paidCerts.map(renderCertCard)}
                   </div>
-
-                </motion.div>
-              );
-            })
+                </section>
+              )}
+            </>
           )}
         </motion.div>
       </AnimatePresence>
@@ -266,11 +325,11 @@ export default function Certifications() {
                   <div className="border-b border-[#e8e6e1] pb-6 mb-6 text-left">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span className="text-[10px] font-mono text-slate-400 font-bold uppercase">{selectedCert.provider}</span>
-                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-400">•</span>
                       <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
                         selectedCert.price === 'Free'
-                          ? 'bg-green-50 border-green-200 text-green-700'
-                          : 'bg-yellow-50 border-yellow-250 text-yellow-755'
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                          : 'bg-amber-50 border-amber-200 text-amber-700'
                       }`}>
                         {selectedCert.type}
                       </span>
@@ -288,7 +347,7 @@ export default function Certifications() {
                       {/* Course Overview */}
                       <div className="space-y-1.5">
                         <h4 className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Course Overview</h4>
-                        <p className="text-xs text-slate-650 leading-relaxed">{selectedCert.desc}</p>
+                        <p className="text-xs text-slate-600 leading-relaxed">{selectedCert.desc}</p>
                       </div>
 
                       {/* Syllabus Breakdown */}
@@ -334,7 +393,7 @@ export default function Certifications() {
                             </div>
                             <div className="flex justify-between items-center text-xs border-t border-slate-100 pt-2">
                               <span className="text-slate-500">Impact</span>
-                              <span className="font-bold text-purple-650">{selectedCert.weight}</span>
+                              <span className="font-bold text-purple-700">{selectedCert.weight}</span>
                             </div>
                           </div>
                         </div>
