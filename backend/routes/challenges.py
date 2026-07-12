@@ -44,18 +44,27 @@ def generate_challenge(
     db = Depends(get_firestore),
     uid: str = Depends(verify_token),
 ):
-    role = get_target_role(db, uid)
+    from services.question_history import get_recent, record
 
-    challenge = generate_dynamic_challenge(role)
+    role = get_target_role(db, uid)
+    context = f"challenge:{role}"
+
+    # Steer generation away from challenges this user was recently served.
+    challenge = generate_dynamic_challenge(role, avoid=get_recent(db, uid, context))
     if not challenge:
         raise HTTPException(status_code=500, detail="Failed to generate dynamic challenge")
-        
+
+    # Remember the served challenge (strip the "[AI] " prefix so it matches base titles).
+    served_title = (challenge.get("title") or "").replace("[AI] ", "").strip()
+    if served_title:
+        record(db, uid, context, served_title)
+
     db.collection("users").document(uid).collection("challenges").add({
         "challenge": challenge,
         "generated_at": firestore.SERVER_TIMESTAMP,
         "status": "pending"
     })
-    
+
     return challenge
 
 

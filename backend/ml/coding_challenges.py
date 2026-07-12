@@ -69,30 +69,60 @@ def _is_valid_challenge(c) -> bool:
     return all(isinstance(t, dict) and "input" in t and "expected" in t for t in tests)
 
 
-def _static_dynamic_challenge(role: str) -> dict:
-    """Pick a static problem and present it as a fresh challenge (always runnable)."""
+# Rotating topics so repeated "Generate" clicks explore different problem types
+# instead of the model settling on the same kind of question.
+_CHALLENGE_FOCUS = [
+    "array manipulation", "two-pointer techniques", "hash maps / frequency counting",
+    "sliding window", "string parsing", "stacks or queues", "recursion / backtracking",
+    "dynamic programming", "greedy algorithms", "binary search", "sorting with a twist",
+    "matrix traversal", "bit manipulation", "math and number theory", "intervals",
+    "graph traversal (BFS/DFS)", "prefix sums", "simulation",
+]
+
+
+def _static_dynamic_challenge(role: str, avoid=None) -> dict:
+    """Pick a static problem and present it as a fresh challenge (always runnable).
+
+    Skips base problems the user was recently served (matched by title) when possible.
+    """
     all_static = load_challenges()
     if not all_static:
         return {}
     role = resolve_canonical_role(role)
+    avoid_norm = {(a or "").strip().lower().replace("[ai] ", "") for a in (avoid or [])}
     role_challenges = [
         c for c in all_static
         if not c.get("roles") or role.lower() in [r.lower() for r in c.get("roles", [])]
     ]
-    base = random.choice(role_challenges if role_challenges else all_static)
+    pool = role_challenges if role_challenges else all_static
+    fresh = [c for c in pool if c.get("title", "").strip().lower() not in avoid_norm]
+    base = random.choice(fresh if fresh else pool)
     new_id = f"ai-{base['id']}-{random.randint(100, 999)}"
     dynamic_copy = {**base, "id": new_id, "title": f"[AI] {base['title']}"}
     DYNAMIC_CHALLENGES[new_id] = dynamic_copy
     return dynamic_copy
 
 
-def generate_dynamic_challenge(role: str) -> dict:
+def generate_dynamic_challenge(role: str, avoid=None) -> dict:
     """Generate a fresh coding challenge via the configured AI provider (Groq/Gemini).
 
+    `avoid` is a list of challenge titles the user was recently served; the model is told
+    not to reproduce them, so repeated "Generate" clicks don't hand back the same problem.
     Falls back to a static problem (guaranteed runnable) when AI is unavailable,
     not configured, or returns a malformed challenge.
     """
+    avoid = [a for a in (avoid or []) if a]
+    seed = random.randint(1000, 9999)
+    focus = random.choice(_CHALLENGE_FOCUS)
+
+    avoid_block = ""
+    if avoid:
+        recent = "\n".join(f"- {a}" for a in avoid[-15:])
+        avoid_block = f"\nDo NOT reproduce or lightly reword any of these recently-generated challenges:\n{recent}\n"
+
     prompt = f"""Generate ONE original coding challenge for a candidate targeting the role: {role}.
+Center it on this topic: {focus}.
+{avoid_block}
 Return ONLY a valid JSON object (no markdown) with EXACTLY this structure:
 {{
   "title": "Short title",
@@ -107,11 +137,13 @@ Return ONLY a valid JSON object (no markdown) with EXACTLY this structure:
     {{"input": "comma-separated args as passed to the function", "expected": "expected return value"}}
   ]
 }}
+Uniqueness token (ignore in output, only forces variety): {seed}
 Keep it self-contained and solvable in one function. Provide 2-3 correct, consistent test cases."""
     system_instruction = "You are a coding-interview problem setter. Return ONLY valid JSON."
 
     try:
-        ai_output = run_ai_prompt(prompt, system_instruction)
+        # High temperature so repeated generations differ.
+        ai_output = run_ai_prompt(prompt, system_instruction, temperature=0.9)
         if ai_output:
             challenge = json.loads(clean_json_response(ai_output))
             if _is_valid_challenge(challenge):
@@ -122,4 +154,4 @@ Keep it self-contained and solvable in one function. Provide 2-3 correct, consis
     except Exception as e:
         print(f"[AI] Dynamic challenge generation failed: {e}. Falling back to a static problem.")
 
-    return _static_dynamic_challenge(role)
+    return _static_dynamic_challenge(role, avoid=avoid)
