@@ -7,8 +7,17 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 const API = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30000, // 30 seconds timeout to handle cold starts but prevent infinite hang
+  timeout: 30000, // 30s normal timeout; a cold-start retry (below) uses longer.
 });
+
+// Free-tier hosts (Render) sleep after inactivity and take ~30-60s to wake, so the
+// FIRST request after idle would otherwise time out and look broken. Fire a
+// non-blocking warm-up ping as soon as the app loads (while the user is still on the
+// landing/login screen) so the server is usually awake by the time it's needed.
+export function warmUpBackend() {
+  axios.get(`${API_BASE_URL}/api/health`, { timeout: 70000 }).catch(() => {});
+}
+warmUpBackend();
 
 // Attach a Firebase ID token to every request. Ask the SDK first — it caches the
 // token and silently refreshes it when it's about to expire, so requests almost
@@ -34,15 +43,25 @@ API.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean; _coldRetry?: boolean };
 
-// On 401, try ONCE to silently refresh the Firebase ID token before logging out.
-// This fixes the "silent logout after ~1 hour" issue when the token expires.
 API.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const original = error.config as RetriableConfig | undefined;
 
+    // Cold-start: if the request timed out (or the server was unreachable while waking),
+    // retry ONCE with a longer timeout before surfacing an error — a sleeping instance
+    // usually answers within ~60s.
+    const isTimeout = error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK';
+    if (isTimeout && original && !original._coldRetry) {
+      original._coldRetry = true;
+      original.timeout = Math.max(original.timeout || 0, 70000);
+      return API(original);
+    }
+
+    // On 401, try ONCE to silently refresh the Firebase ID token before logging out.
+    // This fixes the "silent logout after ~1 hour" issue when the token expires.
     if (error.response?.status === 401 && original && !original._retry) {
       original._retry = true;
       try {

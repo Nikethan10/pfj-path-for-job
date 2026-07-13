@@ -1119,18 +1119,18 @@ export default function Resume() {
                       {/* Internship Probability Gauge */}
                       <div className="glass-card p-5 border-dark-700 flex justify-between items-center relative overflow-hidden">
                         <div className="space-y-1.5">
-                          <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Placement Probability</h4>
+                          <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Readiness Estimate</h4>
                           <h3 className="text-2xl font-black text-slate-800">
-                            {result.internship_readiness >= 80 ? ' Highly Deployable' :
-                             result.internship_readiness >= 60 ? ' Good Placement Outlook' :
-                             result.internship_readiness >= 40 ? 'Moderate Readiness' : 'Action Required'}
+                            {result.internship_readiness >= 80 ? 'Strong' :
+                             result.internship_readiness >= 60 ? 'Good' :
+                             result.internship_readiness >= 40 ? 'Building' : 'Early'}
                           </h3>
                           <p className="text-[10px] text-slate-500 leading-relaxed font-sans max-w-[280px]">
-                            Sigmoid hiring simulation based on repository velocity, ATS score, and tech overlap matrices.
+                            A rough self-assessment from your resume signals (skills, projects, ATS structure) — a guide to where to improve, not an actual chance of being hired.
                           </p>
                         </div>
                         <div className="w-20 h-20 bg-dark-900 rounded-2xl border border-dark-800 flex flex-col justify-center items-center">
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Probability</span>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Estimate</span>
                           <span className="text-2xl font-black text-neon-cyan mt-0.5">{result.internship_readiness || 0}%</span>
                         </div>
                       </div>

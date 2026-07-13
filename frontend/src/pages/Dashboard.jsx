@@ -706,10 +706,9 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="w-full flex justify-between items-center text-[9px] text-slate-500 font-mono border-t border-dark-700 pt-3.5 mt-2">
-            <span>METRIC: READINESS</span>
-            <span>CONNECTED</span>
-          </div>
+          <p className="w-full text-[9px] text-slate-500 leading-relaxed border-t border-dark-700 pt-3.5 mt-2 text-center">
+            A self-progress indicator from your tracked skills, projects &amp; resume — a guide to what to build next, not a placement prediction.
+          </p>
         </div>
 
         {/* Next Best Action Widget */}
