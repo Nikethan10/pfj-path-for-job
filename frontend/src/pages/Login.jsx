@@ -3,17 +3,33 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { verifyFirebaseToken } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import { auth, signInWithGoogle } from '../firebase';
+import { auth, signInWithGoogle, resetPassword } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { authErrorMessage } from '../lib/authErrors';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { loginUser } = useAuth();
   const navigate = useNavigate();
+
+  const handleForgotPassword = async () => {
+    setError('');
+    setNotice('');
+    if (!form.email.trim()) {
+      setError('Enter your email above first, then click "Forgot password?"');
+      return;
+    }
+    try {
+      await resetPassword(form.email.trim());
+      setNotice(`Password reset link sent to ${form.email.trim()}. Check your inbox (and spam).`);
+    } catch (err) {
+      setError(authErrorMessage(err, 'Could not send the reset email. Please try again.'));
+    }
+  };
 
   const handleBackendVerify = async (user, idToken) => {
     try {
@@ -97,6 +113,11 @@ export default function Login() {
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />{error}
             </motion.div>
           )}
+          {notice && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl p-3.5 mb-5 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{notice}
+            </motion.div>
+          )}
 
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-1.5">
@@ -104,7 +125,12 @@ export default function Login() {
               <input type="email" className="input-field w-full" placeholder="you@example.com" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
             <div className="space-y-1.5 relative">
-              <label className="text-xs font-semibold text-slate-500">Password</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-500">Password</label>
+                <button type="button" onClick={handleForgotPassword} className="text-xs font-semibold text-green-700 hover:underline">
+                  Forgot password?
+                </button>
+              </div>
               <input type={showPassword ? 'text' : 'password'} className="input-field w-full pr-10" placeholder="••••••••" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 bottom-3.5 text-slate-400 hover:text-slate-700 transition-colors">
                 {showPassword ? "Hide" : "Show"}

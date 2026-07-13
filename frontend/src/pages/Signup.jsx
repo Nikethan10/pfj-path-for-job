@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { verifyFirebaseToken } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import { auth, signInWithGoogle } from '../firebase';
+import { auth, signInWithGoogle, sendVerification } from '../firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { authErrorMessage } from '../lib/authErrors';
 
@@ -39,6 +39,8 @@ export default function Signup() {
       const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
       // Update the user's profile with their name in Firebase
       await updateProfile(userCredential.user, { displayName: form.name });
+      // Send a verification email (best-effort — never block signup on it).
+      sendVerification(userCredential.user).catch(() => {});
       const idToken = await userCredential.user.getIdToken(true);
       await handleBackendVerify(userCredential.user, idToken);
     } catch (err) {

@@ -3,6 +3,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
+  sendEmailVerification,
   type User,
 } from 'firebase/auth';
 
@@ -23,3 +25,11 @@ export const signInWithGoogle = async (): Promise<User> => {
   const result = await signInWithPopup(auth, googleProvider);
   return result.user;
 };
+
+// Send a password-reset email to the given address.
+export const resetPassword = (email: string): Promise<void> =>
+  sendPasswordResetEmail(auth, email);
+
+// Send an email-verification link to a freshly-created user (best-effort).
+export const sendVerification = (user: User): Promise<void> =>
+  sendEmailVerification(user);

@@ -27,6 +27,7 @@ import NotFound from './pages/NotFound';
 import Loader from './components/Loader';
 import AnnouncementBanner from './components/AnnouncementBanner';
 import Toaster from './components/Toaster';
+import ErrorBoundary from './components/ErrorBoundary';
 import AdminApp from './admin/AdminApp';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -89,14 +90,16 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ConfigProvider>
-          <AnnouncementBanner />
-          <AppRoutes />
-          <Toaster />
-        </ConfigProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <ConfigProvider>
+            <AnnouncementBanner />
+            <AppRoutes />
+            <Toaster />
+          </ConfigProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
