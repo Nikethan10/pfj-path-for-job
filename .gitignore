@@ -65,3 +65,8 @@ coverage/
 # Deploy helper with hardcoded tokens — keep local only
 frontend/deploy_vercel.ps1
 deploy_vercel.ps1
+
+# Personal secret maps / local-only reference (never commit)
+SECRETS.local.md
+*.secrets.md
+secrets/
