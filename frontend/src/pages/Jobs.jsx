@@ -41,13 +41,6 @@ export default function Jobs() {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [matchFilter, setMatchFilter] = useState('All');
   const [selectedJob, setSelectedJob] = useState(null);
-  const [appliedJobs, setAppliedJobs] = useState([]);
-
-  const handleApply = (jobId) => {
-    if (appliedJobs.includes(jobId)) return;
-    setAppliedJobs(prev => [...prev, jobId]);
-  };
-
   useEffect(() => {
     loadJobs();
   }, []);
@@ -108,10 +101,10 @@ export default function Jobs() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[calc(100vh-6rem)] flex flex-col">
-      <div className="flex justify-between items-end mb-8 shrink-0">
+      <div className="flex justify-between items-end mb-4 shrink-0">
         <div>
-          <h1 className="section-title text-3xl mb-1"> Job & Internship Matcher</h1>
-          <p className="text-slate-500">Real-time matching against premium tech roles based on your verified skills.</p>
+          <h1 className="section-title text-3xl mb-1">Job & Internship Matcher</h1>
+          <p className="text-slate-500">Practice matching your verified skills against representative tech roles.</p>
         </div>
         <div className="text-right">
           <p className="text-sm text-slate-500 mb-1">Your Acquired Skills</p>
@@ -120,6 +113,12 @@ export default function Jobs() {
             <span className="text-slate-500 self-end">skills</span>
           </div>
         </div>
+      </div>
+
+      {/* Honest disclosure: these are a curated sample, not a live jobs feed. */}
+      <div className="mb-6 shrink-0 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+        <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span><strong>Sample roles for skill-match practice.</strong> These are representative openings used to show how your skills line up with typical requirements — not live job postings. Apply on the companies' official careers pages.</span>
       </div>
 
       {/* Filters */}
@@ -475,25 +474,17 @@ export default function Jobs() {
                       </a>
                     )}
 
-                    <button 
-                      onClick={() => handleApply(selectedJob.id)}
-                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
-                        appliedJobs.includes(selectedJob.id)
-                          ? 'bg-emerald-600 text-white cursor-default' 
-                          : 'bg-[#166534] hover:bg-[#0f4c28] text-white hover:-translate-y-0.5'
-                      }`}
+                    {/* Honest: sample roles can't be applied to here — send the user to
+                        the company's real openings instead of faking a submission. */}
+                    <a
+                      href={`https://www.google.com/search?q=${encodeURIComponent(`${selectedJob.company} ${selectedJob.role} careers`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 bg-[#166534] hover:bg-[#0f4c28] text-white hover:-translate-y-0.5"
                     >
-                      {appliedJobs.includes(selectedJob.id) ? (
-                        <>
-                          <span>Applied Successfully</span>
-                          <span>✓</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Submit Application via PATH</span>
-                        </>
-                      )}
-                    </button>
+                      <span>Find real openings</span>
+                      <span className="text-sm">↗</span>
+                    </a>
                   </div>
                 </motion.div>
 

@@ -1061,9 +1061,9 @@ export default function Resume() {
                       {result.salary_estimation && (
                         <div className="glass-card p-6 border-dark-700 space-y-4">
                           <div className="flex justify-between items-center border-b border-dark-800 pb-2">
-                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Salary Range Vector</h3>
-                            <span className="text-[9px] font-mono text-neon-cyan bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded">
-                              {result.salary_estimation.market_demand} DEMAND
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Salary Range (Estimate)</h3>
+                            <span className="text-[9px] font-mono text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                              Illustrative
                             </span>
                           </div>
 
@@ -1087,7 +1087,7 @@ export default function Resume() {
                           </div>
 
                           <p className="text-[10px] text-slate-500 leading-relaxed font-sans text-center">
-                            Calculated dynamically based on verified skills, project technical complexity scores, and local internship benchmarks.
+                            Rough illustrative range based on your target role — a general guide, not a market quote or offer prediction.
                           </p>
                         </div>
                       )}
@@ -1098,7 +1098,7 @@ export default function Resume() {
                       <div className="glass-card p-6 border-dark-700">
                         <div className="flex justify-between items-center mb-6 border-b border-dark-800 pb-3">
                           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Candidate Benchmarking</h3>
-                          <span className="text-[9px] text-slate-500 font-mono">VS PEERS & TOP PERFORMERS</span>
+                          <span className="text-[9px] text-slate-500 font-mono">ILLUSTRATIVE REFERENCE BANDS</span>
                         </div>
 
                         <div className="h-64">
