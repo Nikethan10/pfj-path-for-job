@@ -1,0 +1,40 @@
+#!/bin/sh
+# Blocks any commit that would introduce a live credential.
+#
+# Enabled for this repo with:  git config core.hooksPath .githooks
+# Escape hatch (use only for a genuine false positive):  git commit --no-verify
+#
+# Secrets belong in .env files (gitignored) or the Render/Vercel/Firebase
+# dashboards — never inside the repo.
+
+PATTERN='gsk_[A-Za-z0-9]{20,}|AIza[A-Za-z0-9_-]{30,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|vcp_[A-Za-z0-9]{20,}|rnd_[A-Za-z0-9]{15,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|"private_key"[[:space:]]*:[[:space:]]*"-----BEGIN'
+
+# Only inspect lines being ADDED in this commit.
+FOUND=$(git diff --cached --diff-filter=ACM -U0 | grep -E '^\+' | grep -E "$PATTERN")
+
+if [ -n "$FOUND" ]; then
+    echo ""
+    echo "=============================================================="
+    echo " COMMIT BLOCKED - a credential was detected in staged changes"
+    echo "=============================================================="
+    echo ""
+    echo "$FOUND" | cut -c1-100 | head -5
+    echo ""
+    echo "Files staged with a match:"
+    git diff --cached --name-only --diff-filter=ACM | while read -r f; do
+        if git diff --cached -U0 -- "$f" | grep -E '^\+' | grep -qE "$PATTERN"; then
+            echo "  - $f"
+        fi
+    done
+    echo ""
+    echo "Secrets must live in:"
+    echo "  * backend/.env  or  frontend/.env.production   (gitignored)"
+    echo "  * the Render / Vercel / Firebase dashboards"
+    echo ""
+    echo "To fix:  git restore --staged <file>   then remove the key from it."
+    echo "False positive?  git commit --no-verify"
+    echo ""
+    exit 1
+fi
+
+exit 0
