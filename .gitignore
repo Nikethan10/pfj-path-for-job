@@ -70,3 +70,7 @@ deploy_vercel.ps1
 SECRETS.local.md
 *.secrets.md
 secrets/
+
+# Stray infra dumps / helper scripts with tokens (keep local)
+render_services.json
+vercel.json.bak
